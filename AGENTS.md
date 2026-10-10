@@ -8,7 +8,7 @@ repo is, where things stand, and the rules the team has agreed. Humans: this is 
 - **Event:** "Hack the Chip", a one-day hackathon by NYU × Annapurna Labs (the Amazon team that designs
   the AWS Trainium AI chip), on 2026-10-10.
 - **Team:** Six_Seven — six people. GitHub: krishmehtagit (repo owner), Dhritii07, Smruthi01,
-  manishreddy-07, Ankimax, + 1 to come. Several members are not programmers (e.g. electrical
+  manishreddy-07, Ankimax, Bhagavanmadala. Several members are not programmers (e.g. electrical
   engineering background): **explain simply, avoid jargon, keep answers short.**
 - **Organisers' repo** (setup, sample projects, rules): https://github.com/yahavb/trainium-agent-labs
 

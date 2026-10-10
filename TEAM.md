@@ -52,7 +52,7 @@ go back to the model → it tries again, until it solves the problem or says hon
 ## Where we are
 
 - Seat 7 is set up and the model is running on it.
-- Team repo: this one. Members: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax (+1 to come).
+- Team repo: this one. Members: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax, Bhagavanmadala.
 - Earlier work on the organisers' kernel-agent challenge is kept on the branch
   [`kernel-agent-backup`](https://github.com/krishmehtagit/Six_Seven/tree/kernel-agent-backup), in case we need a fallback.
 
