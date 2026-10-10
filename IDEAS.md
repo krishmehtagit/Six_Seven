@@ -12,17 +12,17 @@ Add your idea at the bottom using the same format. Keep it short.
 
 | # | idea | the model does | the checker | fit | risk |
 |---|---|---|---|---|---|
-| 1 | ShapeGuard — find where a chip kernel breaks | picks the next test to run | compares kernel output to a trusted answer | good | the model's part is small; big scope for one day |
-| 2 | Circuit designer (EE) | picks component values for a circuit spec | a circuit simulation checks the spec | very good | we must write a small circuit solver |
-| 3 | Logic designer (digital) | writes a Boolean expression / logic for a truth table | tries every input combination | very good | may be too easy for the model |
-| 4 | SQL helper | writes a SQL query for a question | runs it and compares the result rows | good | not hardware-themed |
-| 5 | Heat-rod + training | the organisers' solved physics project, then train the model on its own attempts | the existing physics checker | ok | training on the chip is new to us |
+| 1 | ShapeGuard — find where a chip kernel breaks (by Dhritii07) | picks the next test to run | compares kernel output to a trusted answer | good | the model's part is small; big scope for one day |
+| 2 | Circuit designer (EE) (suggested by Claude) | picks component values for a circuit spec | a circuit simulation checks the spec | very good | we must write a small circuit solver |
+| 3 | Logic designer (digital) (suggested by Claude) | writes a Boolean expression / logic for a truth table | tries every input combination | very good | may be too easy for the model |
+| 4 | SQL helper (suggested by Claude) | writes a SQL query for a question | runs it and compares the result rows | good | not hardware-themed |
+| 5 | Heat-rod + training (organisers' suggestion) | the organisers' solved physics project, then train the model on its own attempts | the existing physics checker | ok | training on the chip is new to us |
 
 ---
 
-## Idea 1 — ShapeGuard
+## Idea 1 — ShapeGuard (by Dhritii07)
 
-*Uploaded by a teammate; rewritten here in short form. Original in the commit "idea 1".*
+*Idea by Dhritii07; rewritten here in short form. Original in the commit "idea 1".*
 
 **One line:** a tool that finds the input shapes where an AI chip kernel gives wrong answers or slows
 down, and shrinks each failure to the smallest example that still breaks.
@@ -58,7 +58,7 @@ one-page report comparing ShapeGuard with plain fixed tests.
 
 ---
 
-## Idea 2 — Circuit designer (uses our EE background)
+## Idea 2 — Circuit designer (uses our EE background) (suggested by Claude)
 
 **One line:** the model designs a simple circuit to meet a spec, and a circuit simulator checks it.
 
@@ -84,7 +84,7 @@ need more).
 
 ---
 
-## Idea 3 — Logic designer (digital)
+## Idea 3 — Logic designer (digital) (suggested by Claude)
 
 **One line:** the model writes logic for a truth table, and the checker tries every input.
 
@@ -100,7 +100,7 @@ exactly which rows are wrong: "inputs A=1, B=0, C=1 give 0, should give 1." The 
 
 ---
 
-## Idea 4 — SQL helper
+## Idea 4 — SQL helper (suggested by Claude)
 
 **One line:** the model writes a database query to answer a question, and the checker runs it.
 
@@ -113,7 +113,7 @@ correct rows: "you returned 12 rows, expected 9 — you included cancelled order
 
 ---
 
-## Idea 5 — Heat-rod + training
+## Idea 5 — Heat-rod + training (organisers' suggestion)
 
 **One line:** take the organisers' solved physics project (heat-equation problems) and train the model
 on its own graded attempts, so it gets better instead of just retrying.
@@ -128,7 +128,7 @@ across training steps, on our own chip.
 ## Add your idea
 
 ```
-## Idea N — Name
+## Idea N — Name (by your-name)
 
 **One line:**
 **How it works:** (what the model does, what the checker checks, what the feedback says)
