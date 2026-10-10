@@ -122,8 +122,8 @@ passes for it (until C4 exists, ask the C-task person to run it).
 
 | ID | task | done when | files | depends on | who | status |
 |---|---|---|---|---|---|---|
-| A1 | **Model call**: send `spec.txt` to Qwen3-8B on `http://localhost:8000/v1` (thinking **off**, short prompt), pull the Verilog out of the reply | prints one Verilog module for level 1 | `veriloop/agent.py` | — | | todo |
-| A2 | **The loop**: up to 8 rounds × 4 attempts; keep the best; send the chosen feedback level (flag `--feedback A/B/C`) with the previous design; log every attempt as one JSON line (level, round, feedback level, Verilog, score, feedback) | one level runs end to end and writes a log | `veriloop/agent.py` | A1, C3 | | todo |
+| A1 | **Model call**: send `spec.txt` to Qwen3-8B on `http://localhost:8000/v1` (thinking **off**, short prompt), pull the Verilog out of the reply | prints one Verilog module for level 1 | `veriloop/agent.py` | — | Krish (via Claude) | doing |
+| A2 | **The loop**: up to 8 rounds × 4 attempts; keep the best; send the chosen feedback level (flag `--feedback A/B/C`) with the previous design; log every attempt as one JSON line (level, round, feedback level, Verilog, score, feedback) | one level runs end to end and writes a log | `veriloop/agent.py` | A1, C3 | Krish (via Claude) | doing |
 | A3 | **Calibration**: at the end of each level the agent states `solved` or `could not verify`; record it next to the checker's real verdict | log has both; mismatches counted | `veriloop/agent.py` | A2 | | todo |
 | A4 | **Experiment runner**: for chosen levels × feedback A/B/C × N runs, call the agent and append one row per run to `results/summary.csv` | one command runs a full grid | `veriloop/run_experiment.py` | A2 | | todo |
 
