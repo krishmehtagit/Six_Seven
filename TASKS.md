@@ -101,7 +101,7 @@ benches.
 | C1 | **Checker core**: compile a `.v` with `iverilog`; on a compile error, return the line and the message in plain words | a broken `.v` gives "line 4: …" not a raw dump | `veriloop/checker.py`, `veriloop/levels/README.md` | — | Krish (via Claude) | done — 12/12 compile cases pass on seat 7 and Mac (`python veriloop/tests/test_compile.py`) |
 | C2 | **Test bench + compare**: generate a test bench from `reference.py`, run it with `vvp`, parse the outputs, compare with `reference()` | `checker.py levels/01_mux good.v` → pass; `bad_1.v` → fail | `veriloop/checker.py` | C1, L1 | Krish (via Claude) | done — 11/11 simulation cases pass on seat 7 and Mac (`python veriloop/tests/test_simulate.py`) |
 | C3 | **Score + feedback A/B/C**: score 0–1 (compiles / runs / fraction of steps correct); feedback A = pass/fail, B = "x of N steps wrong", C = first wrong step: inputs, signal, expected vs got, cycle number. **Never print the full answer.** | the three messages for a `bad_*.v` read correctly | `veriloop/checker.py` | C2 | Krish (via Claude) | done — `checker.grade()`; 9/9 feedback cases pass on seat 7 and Mac (`python veriloop/tests/test_feedback.py`) |
-| C4 | **Checker self-test**: for every level folder, `good.v` must pass and every `bad_*.v` must fail | `python veriloop/selftest.py` prints PASS for all levels written so far | `veriloop/selftest.py` | C3 | | todo |
+| C4 | **Checker self-test**: for every level folder, `good.v` must pass and every `bad_*.v` must fail | `python veriloop/selftest.py` prints PASS for all levels written so far | `veriloop/selftest.py` | C3 | Krish (via Claude) | doing |
 
 ## Levels — one person per level, all in parallel
 
@@ -125,7 +125,7 @@ passes for it (until C4 exists, ask the C-task person to run it).
 | A1 | **Model call**: send `spec.txt` to Qwen3-8B on `http://localhost:8000/v1` (thinking **off**, short prompt), pull the Verilog out of the reply | prints one Verilog module for level 1 | `veriloop/agent.py` | — | Krish (via Claude) | done — `agent.ask()` + `extract_verilog()`; live on seat 7, thinking off, token counts logged |
 | A2 | **The loop**: up to 8 rounds × 4 attempts; keep the best; send the chosen feedback level (flag `--feedback A/B/C`) with the previous design; log every attempt as one JSON line (level, round, feedback level, Verilog, score, feedback) | one level runs end to end and writes a log | `veriloop/agent.py` | A1, C3 | Krish (via Claude) | done — `python veriloop/agent.py --level DIR --feedback A|B|C --log FILE`; live on seat 7: counter and adder solved on round 0; `--offline` tests the loop without a model |
 | A3 | **Calibration**: at the end of each level the agent states `solved` or `could not verify`; record it next to the checker's real verdict | log has both; mismatches counted | `veriloop/agent.py` | A2 | | todo |
-| A4 | **Experiment runner**: for chosen levels × feedback A/B/C × N runs, call the agent and append one row per run to `results/summary.csv` | one command runs a full grid | `veriloop/run_experiment.py` | A2 | | todo |
+| A4 | **Experiment runner**: for chosen levels × feedback A/B/C × N runs, call the agent and append one row per run to `results/summary.csv` | one command runs a full grid | `veriloop/run_experiment.py` | A2 | Krish (via Claude) | doing |
 
 ## Phase 5 — measure
 
