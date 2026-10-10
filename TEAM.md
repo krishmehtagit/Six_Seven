@@ -62,7 +62,7 @@ How it is scored: **30%** correctness on held-back shapes · **25%** levels clea
 
 ## 3. Roles — put your name in
 
-Team on GitHub: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, + 2 to come. Claim a row by writing
+Team on GitHub: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax, + 1 to come. Claim a row by writing
 your name and pushing.
 
 | role | what you own | coding? | name |
