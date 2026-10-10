@@ -18,6 +18,7 @@ Add your idea at the bottom using the same format. Keep it short.
 | 4 | SQL helper (suggested by Claude) | writes a SQL query for a question | runs it and compares the result rows | good | not hardware-themed |
 | 5 | Heat-rod + training (organisers' suggestion) | the organisers' solved physics project, then train the model on its own attempts | the existing physics checker | ok | training on the chip is new to us |
 | **6** | **VeriLoop — the model designs chip hardware (suggested by Claude) — our best shot** | writes Verilog (the language chips are designed in) for a hardware block | simulates it on every input and names the exact signal, cycle and input that is wrong | **best** | one install (`iverilog`); levels must be tuned so the model is challenged |
+| 7 | a biomedical signal front-end designer | Can a small model on Trainium design the analog filter and amplifier stages of an EEG/ECG front-end using only real, purchasable component values, guided by a checker that computes the circuit’s actual response? | 
 
 ---
 
