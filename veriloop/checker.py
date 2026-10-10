@@ -350,15 +350,29 @@ class Grade:
 
 def _show(value, name=None, labels=None):
     """A value as feedback C shows it. With LABELS in reference.py (e.g. light: 0 -> RED), the name of the
-    value is shown too -- "YELLOW (2)" says more to the model than "2"."""
+    value is shown too -- "YELLOW (2)" says more to the model than "2". `labels` may also carry
+    "__signed__": {name: width} (from SIGNED in reference.py), so -5 is shown as -5, not 1048571."""
     if value is None:
         return "x (undefined)"
-    label = (labels or {}).get(name, {}).get(value)
+    labels = labels or {}
+    width = labels.get("__signed__", {}).get(name)
+    if width and value >= 1 << (width - 1):
+        value -= 1 << width
+    label = labels.get(name, {}).get(value)
     return f"{label} ({value})" if label else str(value)
 
 
 def _vals(d, labels=None):
     return " ".join(f"{k}={_show(v, k, labels)}" for k, v in d.items())
+
+
+def _labels(ref):
+    """LABELS from reference.py, plus the widths of any SIGNED outputs, for _show."""
+    lab = dict(getattr(ref, "LABELS", None) or {})
+    signed = getattr(ref, "SIGNED", None)
+    if signed:
+        lab["__signed__"] = {n: ref.OUTPUTS[n] for n in signed if n in ref.OUTPUTS}
+    return lab
 
 
 def score_of(sim):
@@ -376,7 +390,7 @@ def _first_wrong_c(ref, sim):
     read it off a waveform -- the inputs, the signal, what it gave, what was expected, and for a clocked
     design the cycles just before. A few examples at most, never the whole table."""
     unit = "cycle" if ref.CLOCKED else "test"
-    lab = getattr(ref, "LABELS", None)
+    lab = _labels(ref)
     first = min(m["step"] for m in sim.mismatches)
     lines = []
     if ref.CLOCKED:
