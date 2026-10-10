@@ -134,12 +134,12 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - [ ] Demo rehearsed once (2 minutes: the failure → the feedback → the fix → the graph)
 - [ ] Final check of the requirements list below, then submit
 
-## ✅ Final status (4:10 pm)
+## ✅ Final status — SUBMITTED
 
-All experiments are finished and the models on our seats are stopped. Results, graph, taxonomy and
-calibration are in `results/`; the write-up is in `SUBMISSION.md`, `CHECKER.md`, `DEMO.md` and `README.md`.
-The submission is prepared as a pull request to the organisers' repo (folder `projects/six-seven-veriloop/`),
-to be opened once the submission route is confirmed.
+**Pull request:** https://github.com/yahavb/trainium-agent-labs/pull/15 (opened 5:36 pm), adding
+`projects/07_Six_Seven/` to the organisers' repo. Pushing to branch `07_Six_Seven` on
+`krishmehtagit/trainium-agent-labs` updates it. All runs finished (141 counted, incl. feedback D); models
+on our seats are stopped.
 
 ## Findings so far (real runs, seat 7)
 
