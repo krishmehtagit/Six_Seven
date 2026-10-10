@@ -224,7 +224,7 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--level", required=True, help="a level folder, e.g. levels/03_counter")
-    ap.add_argument("--feedback", choices=["A", "B", "C"], default="C")
+    ap.add_argument("--feedback", choices=["A", "B", "C", "D"], default="C")
     ap.add_argument("--rounds", type=int, default=8)
     ap.add_argument("--samples", type=int, default=4, help="attempts per round (the server runs 4 at once)")
     ap.add_argument("--log", help="append every attempt to this JSONL file")

@@ -124,7 +124,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tag", help="who/what, used in the file names, e.g. krish or krish-fsm")
     ap.add_argument("--levels", nargs="*", help="level folders (default: every level in veriloop/levels/)")
-    ap.add_argument("--feedback", nargs="*", default=["A", "B", "C"], choices=["A", "B", "C"])
+    ap.add_argument("--feedback", nargs="*", default=["A", "B", "C"], choices=["A", "B", "C", "D"])
     ap.add_argument("--runs", type=int, default=5, help="runs per level x feedback (default 5)")
     ap.add_argument("--rounds", type=int, default=8)
     ap.add_argument("--samples", type=int, default=4)
