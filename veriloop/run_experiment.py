@@ -31,7 +31,8 @@ import selftest  # noqa: E402
 
 RESULTS = os.path.join(HERE, "results")
 FIELDS = ["date", "tag", "seat", "model", "level", "feedback", "run", "solved", "rounds_used", "best_score",
-          "attempts", "distinct_designs", "prompt_tokens", "completion_tokens", "seconds", "offline", "run_id"]
+          "attempts", "distinct_designs", "prompt_tokens", "completion_tokens", "seconds", "offline", "run_id",
+          "max_rounds"]
 
 
 def summary_path(tag, date):
@@ -76,7 +77,7 @@ def run(a):
             print(f"\n[{k}/{len(todo)}] {level}  feedback {fb}  run {r}")
             s = agent.run_level(d, fb, a.rounds, a.samples, apath, a.offline, run_id=run_id, quiet=not a.verbose)
             row = dict(date=date, tag=a.tag, seat=socket.gethostname(), model=agent.MODEL, level=level,
-                       feedback=fb, run=r, run_id=run_id,
+                       feedback=fb, run=r, run_id=run_id, max_rounds=a.rounds,
                        **{k2: s[k2] for k2 in ("solved", "rounds_used", "best_score", "attempts", "distinct_designs",
                                                "prompt_tokens", "completion_tokens", "seconds", "offline")})
             w.writerow(row)

@@ -140,6 +140,10 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - Level 4 (traffic light) on seats 30, 31, 33, 230–234, feedback A/B/C, 1 run each → done ~2:40 pm.
 - Then automatically: **level 5** (MAC) on 30, 31, 33 and **level 6** (FIFO) on 230, 231, 232 → done ~3:20 pm.
 - Seats 233 and 234 shut their model down after level 4. Seat 7 is cleaned and handed back.
+- **Update 2:45 pm:** level 4 done (0/8 solved for A, B and C; mean best score 0.65 / 0.65 / 0.69). Level 5
+  done (9/9 solved, all on round 2). Level 6 running on 230–232. **Level 4 with 12 rounds** now running on
+  30, 31, 33 (each seat starts with a different feedback level; ~25 min per run, 3 runs per seat). Recorded
+  as its own setting (`max_rounds` column), never mixed with the 6-round runs.
 
 **When we're back, in order:**
 1. Check: `bash veriloop/collect.sh 30 31 33 230 231 232 233 234` (credentials pasted first), then

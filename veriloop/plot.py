@@ -31,6 +31,12 @@ def load(paths=None):
     for p in paths:
         with open(p) as f:
             rows += [r for r in csv.DictReader(f) if r["offline"] != "True"]
+    for r in rows:
+        # Runs with a different round budget are a different setting: keep them apart. Older rows have
+        # no max_rounds column; they were all 6 rounds.
+        mr = r.get("max_rounds") or "6"
+        if mr != "6":
+            r["level"] = f"{r['level']} ({mr} rounds)"
     return rows
 
 
