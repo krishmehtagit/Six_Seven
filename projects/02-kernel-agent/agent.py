@@ -150,13 +150,24 @@ def grade(source, level):
 
     if failures:
         lbl, first = failures[0]
+        marker, route = OFF_ROUTE.get(level, (None, None))
+        if marker and marker in source:
+            # Lead with the route: fixing the error it hit would only make the wrong approach run.
+            first = f"{route} (It currently fails with: {first})"
         return (sum(WEIGHTS[k] for k, v in parts.items() if v)
                 + WEIGHTS["correct"] * passed / len(spec["shapes"]), parts,
                 f"{passed} of {len(spec['shapes'])} shapes passed. On {lbl}: {first}")
 
+    # Numerically right everywhere. On a level about transfer counts, that is not yet a pass if every
+    # element went to HBM on its own; half credit for correctness, and the message names the change.
+    issue = nkibench.check_issue_bound(source, level)
+    if issue and level in nkibench.ISSUE_BOUND_FAILS:
+        return (sum(WEIGHTS[k] for k, v in parts.items() if v) + WEIGHTS["correct"] / 2, parts,
+                issue)
+
     parts["correct"] = True
     reward = sum(WEIGHTS.values())
-    note = "Correct on every shape."
+    note = "Correct on every shape." + (f" Note: {issue}" if issue else "")
     if intensity:
         note += " " + nkibench.explain_roofline(intensity)
     return reward, parts, note
@@ -214,6 +225,13 @@ def available_names(dotted):
     import difflib
     import importlib
     mod_name, _, attr = dotted.rpartition(".")
+    # Measured on level 1: told "nisa has no multiply, its real names include NkiInstruction,
+    # activate2, ..." it invented scalar_mul next round. An alphabetical list says what exists, not
+    # which one does the job. When the invented name says what it wanted, name the real call for that.
+    for words, real in INTENT_CALLS:
+        if "matmul" not in attr.lower() and any(w in attr.lower() for w in words):
+            return (f" `{mod_name}` has no `{attr}`. For what that name is reaching for, the real "
+                    f"call is {real}")
     try:
         mod = importlib.import_module(mod_name)
     except Exception:
@@ -225,6 +243,32 @@ def available_names(dotted):
                 f"{', '.join(close)}. Pick one of those or use a different approach.")
     return (f" `{mod_name}` has no `{attr}`, and nothing similar exists. Its real names include: "
             f"{', '.join(sorted(names)[:25])}.")
+
+
+# Invented name -> the real call that does what it was reaching for. Checked in order.
+INTENT_CALLS = [
+    (("mul", "scale", "div"),
+     "nisa.tensor_scalar(dst=out_tile, data=tile, op0=nl.multiply, operand0=c) -- it multiplies "
+     "every element of a tile by the constant c. To divide by n, multiply by 1.0 / n."),
+    (("mean", "avg", "average", "reduce", "sum", "pool"),
+     "nl.sum(view, axis=[...]) -- it sums a tile over the listed axes. For a mean, sum and then "
+     "scale by 1.0 / count with nisa.tensor_scalar."),
+]
+
+
+# A kernel heading down a route that cannot work for its level, detected in the source. The error
+# it hits is real but beside the point: on level 1 the model reached for nc_matmul and spent rounds
+# fixing psum placement and invented matmul arguments, none of which pooling needs. Says where the
+# route is, not the strides -- printing the answer makes the model copy it (Project 1, measured).
+OFF_ROUTE = {
+    1: ("nc_matmul",
+        "Average pooling needs no matmul, so drop nc_matmul and the psum tile entirely. The route: "
+        "dma_copy the input into one sbuf tile; make a strided view of it with "
+        "tile.ap([[stride, count], ...]) -- one [stride, count] pair per axis, outermost first, "
+        "strides counted in elements of the flat C*H*W layout -- shaped [C, H/p, W/p, p, p] so the "
+        "two pool-window axes come last; nl.sum that view over axis=[3, 4]; scale the sum by "
+        "1.0 / (p*p) with nisa.tensor_scalar; dma_copy the result to the output."),
+}
 
 
 def real_signature(func_name):

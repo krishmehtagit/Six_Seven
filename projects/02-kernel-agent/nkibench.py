@@ -29,6 +29,7 @@ marked NEEDS DEVICE VERIFICATION in the selftest output. Run --selftest on the i
 import argparse
 import ast
 import importlib.util
+import os
 import sys
 import textwrap
 
@@ -416,6 +417,84 @@ def check_rules(src, level_n):
     return sorted(set(bad))
 
 
+HBM_BUFFERS = {"shared_hbm", "hbm", "private_hbm"}
+
+# Levels where an element-at-a-time HBM write is a FAILURE rather than a note. Level 2 only: its
+# lesson is the transfer count, so a kernel that pays one transfer per element has not passed it.
+# Elsewhere it is reported but not scored, since rejecting a correct kernel is worse than missing one.
+ISSUE_BOUND_FAILS = {2}
+
+
+def find_element_hbm_writes(src, level_n):
+    """Writes into an HBM tensor, one element at a time, inside a loop.
+
+    The transfer counter only sees nisa.dma_copy, so a kernel that writes `out[p, i * F1 + j] = ...`
+    in three nested loops issued 1 counted transfer and P*F uncounted ones -- and level 2, whose whole
+    lesson is the NUMBER of transfers, scored 1.0. Measured: that was the kernel that "solved" it on
+    round 0. This finds the pattern in the text: an assignment (or a dst=) into a kernel argument or an
+    nl.ndarray(..., buffer=nl.shared_hbm), inside a loop, indexed only by scalars. A slice or nl.ds in
+    the index means a whole tile moves, which is the intended route, so that is never flagged.
+    """
+    spec = LEVELS[level_n]
+    try:
+        tree = ast.parse(src)
+    except SyntaxError:
+        return []
+
+    hbm = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == spec["entry"]:
+            hbm |= {a.arg for a in node.args.args}
+        if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call) \
+                and _dotted(node.value.func).split(".")[-1] == "ndarray":
+            buf = next((k.value for k in node.value.keywords if k.arg == "buffer"), None)
+            if buf is not None and _dotted(buf).split(".")[-1] in HBM_BUFFERS:
+                hbm |= {t.id for t in node.targets if isinstance(t, ast.Name)}
+
+    def scalar_index(sub):
+        for n in ast.walk(sub.slice):
+            if isinstance(n, ast.Slice):
+                return False
+            if isinstance(n, ast.Call) and _dotted(n.func).split(".")[-1] == "ds":
+                return False
+        return True
+
+    def element_write(t):
+        return (isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name)
+                and t.value.id in hbm and scalar_index(t))
+
+    found = []
+
+    def visit(node, in_loop):
+        if isinstance(node, (ast.Assign, ast.AugAssign)) and in_loop:
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            found.extend((node.lineno, ast.unparse(t)) for t in targets if element_write(t))
+        if isinstance(node, ast.Call) and in_loop \
+                and _dotted(node.func).split(".")[-1] != "dma_copy":
+            # dma_copy is already counted at runtime; anything else writing to HBM is not.
+            found.extend((node.lineno, ast.unparse(k.value)) for k in node.keywords
+                         if k.arg == "dst" and element_write(k.value))
+        for child in ast.iter_child_nodes(node):
+            visit(child, in_loop or isinstance(node, (ast.For, ast.While)))
+
+    visit(tree, False)
+    return found
+
+
+def check_issue_bound(src, level_n):
+    """A message if the kernel writes HBM element by element, else None. See find_element_hbm_writes."""
+    found = find_element_hbm_writes(src, level_n)
+    if not found:
+        return None
+    line, target = found[0]
+    return (f"CORRECT NUMBERS, BUT ISSUE-BOUND: line {line} writes `{target}` into an HBM tensor one "
+            f"element at a time inside a loop, so every element is its own transfer. The cost here is "
+            f"the NUMBER of transfers, not the bytes. Do the rearranging on-chip instead: build the "
+            f"result in an SBUF tile, moving a whole column per step with the partition axis as `:` "
+            f"(nisa.tensor_copy into tile[:, nl.ds(col, 1)]), then write that tile to HBM with ONE "
+            f"nisa.dma_copy.")
+
+
 # ---------------------------------------------------------------- layer 1b: numerics
 
 def describe_mismatch(got, want, tol=2e-2):
@@ -727,6 +806,11 @@ def verify(path, level_n, tol=2e-2, seed=0):
                                 counted, f, minimum_hbm_bytes(args, want)))
 
     print(f"  numerics   {passed}/{len(spec['shapes'])} shapes passed")
+    issue = check_issue_bound(src, level_n)
+    if issue:
+        print(f"\n  {issue}")
+        if level_n in ISSUE_BOUND_FAILS:
+            failures.append(("every shape", issue))
     for lbl, m in failures[:3]:
         print(f"\n  case {lbl}:")
         print(textwrap.indent(m, "    "))
@@ -831,6 +915,28 @@ def selftest():
     v = check_rules(plausible, 4)
     print(f"  accepts a plausible kernel         -> {'ok' if not v else 'FAIL: ' + str(v)}")
     rc |= 0 if not v else 1
+
+    # Element-at-a-time HBM writes. The first is the kernel that "solved" level 2 on round 0 of a
+    # real run: three nested loops writing the HBM output one element per iteration.
+    elementwise = ("import nki\nimport nki.isa as nisa\nimport nki.language as nl\n"
+                   "@nki.jit\ndef tensor_transpose2D_kernel_(x, shape2D):\n"
+                   "    P, F = x.shape\n    F1, F2 = shape2D\n"
+                   "    out = nl.ndarray((P, F), dtype=x.dtype, buffer=nl.shared_hbm)\n"
+                   "    sbuf = nl.ndarray((P, F1, F2), dtype=x.dtype, buffer=nl.sbuf)\n"
+                   "    nisa.dma_copy(dst=sbuf, src=x)\n"
+                   "    for p in nl.affine_range(P):\n"
+                   "        for i in nl.affine_range(F2):\n"
+                   "            for j in nl.affine_range(F1):\n"
+                   "                out[p, i * F1 + j] = sbuf[p, j, i]\n"
+                   "    return out\n")
+    ok = check_issue_bound(elementwise, 2) is not None
+    print(f"  catches element-wise HBM writes    -> {'ok' if ok else 'UNDETECTED'}")
+    rc |= 0 if ok else 1
+    ref2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reference_level2.py")
+    if os.path.exists(ref2):
+        ok = check_issue_bound(open(ref2).read(), 2) is None
+        print(f"  accepts the tiled reference (2)    -> {'ok' if ok else 'FAIL: flagged'}")
+        rc |= 0 if ok else 1
 
     # Byte sizing. A 2x error here silently doubles every arithmetic intensity and can turn a
     # memory-bound kernel into a plausible-looking compute-bound one -- which is exactly what

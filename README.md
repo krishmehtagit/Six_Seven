@@ -1,3 +1,5 @@
+> **Team: start with [`TEAM.md`](TEAM.md)** — our plan, roles, task board, results and how to work.
+
 # Hack the Chip — NYU × Annapurna Labs
 
 **Annapurna Labs** is the Amazon team that designs **AWS Trainium**, the custom silicon behind a large
