@@ -1,4 +1,4 @@
-# Team hub — Hack the Chip (NYU × Annapurna Labs), 2026-10-10
+# Team Six_Seven — Hack the Chip (NYU × Annapurna Labs), 2026-10-10
 
 **Start here.** This file is the single source of truth for the team: the goal, the plan, who owns what,
 where every task stands, and how to submit. Update it whenever you finish or start something — commit
