@@ -3,39 +3,110 @@
 **Start here.** One page: our idea, what the organisers require, and where we are.
 Whenever anything changes, commit and push straight away (`git pull --rebase` first) so everyone sees it.
 
-## Our idea
+## Our idea: VeriLoop
 
-**To be decided by the team.** Candidates are in [`IDEAS.md`](IDEAS.md). Write the chosen one here in 2–3 lines once agreed.
+**The small model on our Trainium chip designs digital hardware in Verilog. A simulator checks every
+design and tells the model exactly which signal is wrong on which clock cycle. We measure how much the
+quality of that feedback changes the success rate.** Full write-up: Idea 6 in [`IDEAS.md`](IDEAS.md).
+
+Levels, easy → hard: (1) 4-to-1 multiplexer · (2) 4-bit adder · (3) 8-bit counter with enable/reset ·
+(4) traffic-light state machine · (5) multiply-accumulate (MAC) cell — the building block of Trainium's
+matrix engine.
+
+The experiment: same levels, **three feedback levels**, 5 runs each →
+**A** pass/fail only · **B** "12 of 16 inputs wrong" · **C** "cycle 7: `count` went 9 → 0, should be 9 → 10".
+The result is one table and one graph: **solve rate vs. feedback quality**.
 
 ## Plan — phase by phase
 
-Times are rough until we know the deadlines. Tick a phase when it is done.
+Times are a guide; fix them once we know the deadlines. Tick items as they are done, and push.
 
-**1. Planning (now)**
-- [ ] Everyone pitches ideas; pick **one**
-- [ ] Check it fits: runs on our chip, uses the model, and has a **checker** — a cheap, exact way to
-      say if an attempt is right and *why* it is wrong
-- [ ] Write the idea in 2–3 lines under "Our idea" above
+### 1. Planning — done
+- [x] Ideas collected in `IDEAS.md`; the team picked **VeriLoop**
+- [x] Fits the rules: the model runs on our Trainium chip; the checker (a Verilog simulator) runs on the
+      CPU, exactly like both organiser sample projects
 
-**2. Approval**
-- [ ] Pitch it to an Annapurna engineer and get a yes (before the proposal deadline)
-- [ ] Ask for the submission deadline; write both times below
+### 2. Approval — now, before anything is built
 
-**3. Build**
-- [ ] The **checker** first, tested on known-good and known-bad answers *before* the model is involved
-- [ ] One model attempt end to end
-- [ ] The loop: attempt → checker → feedback → retry, logging every attempt with its score
+**Who goes:** two people — one who explains, one who takes notes. Bring a laptop with this page open.
 
-**4. Measure**
-- [ ] Run it several times (not once) and record the success rate and spread
-- [ ] Improve the checker's feedback where the model gets stuck; re-measure; keep only what helps
+**How we pitch it (about 1 minute):**
 
-**5. Write-up and demo**
-- [ ] One-page note: what we ran, on what, how many runs, the spread
-- [ ] Demo: one case where the model failed, the feedback said why, and it recovered
+1. **Open with one sentence:**
+   > "A small model on your chip designs chip hardware, a simulator grades every design down to the exact
+   > signal and clock cycle, and we measure how much the quality of that feedback changes the success rate."
+2. **The loop, in plain words:** "The model writes a Verilog module from a short spec. We simulate it
+   against a Python reference on every input. The checker says what is wrong — for example 'on cycle 7 the
+   counter wrapped to 0 instead of going to 10' — and the model tries again. Every attempt is logged."
+3. **Why it fits your rules:** "The model runs on our seat's Trainium chip. The checker runs on the CPU,
+   like the heat-rod and kernel projects. We hand in the checker, the attempt log and a one-page note."
+4. **Why it matters to Annapurna:** "It is your daily work — designing and verifying hardware — and level 5
+   is a multiply-accumulate cell, the unit your matrix engine is built from."
+5. **The result we promise:** "Your README suggests making the checker worse on purpose and measuring the
+   slowdown. We do exactly that: three feedback levels, five runs each, and a graph of solve rate versus
+   feedback quality. We report rates and spread, not one lucky run."
+6. **Ask them directly:** "Does this fit in a day? Is anything here against the rules?"
 
-**6. Submit**
-- [ ] Final check of the requirements list, then submit
+**Questions they may ask, and our answers:**
+
+| they ask | we answer |
+|---|---|
+| "Isn't the checker on the CPU, not the chip?" | Yes — the *model* runs on the chip, the checker on the CPU, same as both of your sample projects. |
+| "What if the model solves everything first try?" | Levels 3–5 are clocked designs where small models struggle; and if it does, the feedback comparison is still measured on the levels where it fails. We will report it honestly either way. |
+| "How do you know the checker is right?" | We test it on a correct design and on deliberately broken ones *before* the model is involved, and ship those tests. |
+| "Why not just use a bigger model?" | The question is whether the *loop* makes a small model succeed — that is your challenge statement. |
+| "Can you finish in time?" | Levels 1–3 and the A/B/C comparison are the core; levels 4–5 are a stretch. One install (`iverilog`), already checked on our seat. |
+
+**Also ask them:**
+- [ ] The **proposal deadline** and the **submission deadline** — write them in the requirements list below
+- [ ] **How and where** to submit (a repo link? a form? a presentation slot?)
+- [ ] Whether our repo must be **public** for judging
+
+**Outcome:**
+- [ ] **Approved** → start phase 3 at once
+- [ ] Changes requested → write them here, adjust, and go back if needed
+- [ ] Not approved → fall back to the kernel-agent work on branch `kernel-agent-backup`
+
+### 3. Build the checker first (~1 hour)
+- [ ] Install `iverilog` on each seat that runs experiments (`apt-get install -y iverilog`)
+- [ ] For levels 1–3: the spec (3–5 lines each), a Python reference model, and a test bench that
+      tries every input (combinational) or a test sequence with edge cases (clocked: reset, enable off,
+      wrap-around)
+- [ ] Feedback at all three levels — A, B, C — from the same simulation
+- [ ] **Prove the checker before the model touches it:** a correct design must pass, and at least 3
+      deliberately broken designs per level must fail with the right message
+- [ ] **Sanity-check rule:** a feedback message never contains the full answer (the organisers measured
+      that the model just copies it)
+
+### 4. Connect the model (~1 hour)
+- [ ] One attempt end to end on level 1: spec → model → Verilog → checker → score
+- [ ] The loop: up to 8 rounds, 4 attempts per round, feedback level chosen by a flag; reuse the loop
+      code from `kernel-agent-backup` (`agent.py`) where it helps
+- [ ] Log every attempt: level, round, feedback level, the Verilog, score, the feedback sent
+- [ ] Thinking mode **off**, prompts short (organisers measured both)
+- [ ] Levels 4–5 only if levels 1–3 work
+
+### 5. Measure (~1.5 hours)
+- [ ] For each level × feedback level A / B / C: **5 runs**; record solved-out-of-5, rounds needed, spread
+- [ ] Fill the results table below; make the graph (solve rate vs. feedback level)
+- [ ] Calibration: the agent says "solved" or "could not verify" — check every claim against the simulator
+- [ ] Pick the demo case: a failure on an early round that feedback C fixes
+
+### 6. Write-up, demo, submit (last hour)
+- [ ] `SUBMISSION.md` — one page: what we ran, on what, how many runs, the spread, the graph, limits
+- [ ] The checker write-up: what it accepts and rejects, and why
+- [ ] Demo rehearsed once (2 minutes: the failure → the feedback → the fix → the graph)
+- [ ] Final check of the requirements list below, then submit
+
+## Results (fill in from real runs only)
+
+| level | A: pass/fail (solved / 5) | B: verdict (solved / 5) | C: named fix (solved / 5) |
+|---|---|---|---|
+| 1 mux | | | |
+| 2 adder | | | |
+| 3 counter | | | |
+| 4 state machine | | | |
+| 5 MAC cell | | | |
 
 ## What the organisers require for our own project
 
@@ -51,6 +122,7 @@ go back to the model → it tries again, until it solves the problem or says hon
 
 ## Where we are
 
+- **Idea chosen: VeriLoop.** Next step: pitch it for approval (phase 2).
 - Seat 7 is set up and the model is running on it.
 - Team repo: this one. Members: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax, Bhagavanmadala.
 - Earlier work on the organisers' kernel-agent challenge is kept on the branch

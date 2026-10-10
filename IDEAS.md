@@ -127,7 +127,7 @@ across training steps, on our own chip.
 
 ---
 
-## Idea 6 — VeriLoop: the model designs chip hardware (suggested by Claude) — our best shot
+## Idea 6 — VeriLoop: the model designs chip hardware (suggested by Claude) — ✅ CHOSEN BY THE TEAM
 
 **One line:** the small model on the chip designs digital hardware blocks in Verilog, a simulator checks
 every design, and the feedback tells it exactly which signal is wrong on which clock cycle — and we
