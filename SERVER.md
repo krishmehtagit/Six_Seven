@@ -96,7 +96,7 @@ iverilog -V | head -1
 
 ## Getting our code onto your seat, and results back
 
-The repo is private, so the easiest way is to **work in the repo on your laptop and copy files over**.
+The easiest way is to **work in the repo on your laptop and copy files over**.
 Run these **on your laptop**, from the repo folder:
 
 ```bash
