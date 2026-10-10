@@ -9,9 +9,22 @@ Whenever anything changes, commit and push straight away (`git pull --rebase` fi
 design and tells the model exactly which signal is wrong on which clock cycle. We measure how much the
 quality of that feedback changes the success rate.** Full write-up: Idea 6 in [`IDEAS.md`](IDEAS.md).
 
-Levels, easy → hard: (1) 4-to-1 multiplexer · (2) 4-bit adder · (3) 8-bit counter with enable/reset ·
-(4) traffic-light state machine · (5) multiply-accumulate (MAC) cell — the building block of Trainium's
-matrix engine.
+**The levels, easy → hard.** 1–3 are the core; 4–8 are the harder levels, where small models struggle and
+the feedback should matter most — that is what makes the graph meaningful.
+
+| level | hardware block | what makes it hard | core / harder |
+|---|---|---|---|
+| 1 | 4-to-1 multiplexer | warm-up: proves the loop works | core |
+| 2 | 4-bit adder with carry out | the carry chain | core |
+| 3 | 8-bit counter with enable and reset | clocked: timing and reset matter | core |
+| 4 | traffic-light state machine | states, transitions, timing | harder |
+| 5 | multiply-accumulate (MAC) cell | multiply + add + keep a running sum; the unit Trainium's matrix engine is built from | harder |
+| 6 | FIFO buffer (4 entries) | full/empty flags, read and write in the same cycle | harder |
+| 7 | 2×2 systolic array | four MAC cells passing data to their neighbours each cycle — a mini version of Trainium's matrix engine | harder |
+| 8 | pipelined MAC (2 stages) | the answer arrives one cycle later; the model must keep the stages in step | harder |
+
+Write each harder level's spec and test bench the same way as levels 1–3. If a level turns out too easy
+(solved on round 0 every time) or too hard (never past 0.0), note it and move on — both are results.
 
 The experiment: same levels, **three feedback levels**, 5 runs each →
 **A** pass/fail only · **B** "12 of 16 inputs wrong" · **C** "cycle 7: `count` went 9 → 0, should be 9 → 10".
@@ -73,7 +86,7 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 | "What if the model solves everything first try?" | Levels 3–5 are clocked designs where small models struggle; and if it does, the feedback comparison is still measured on the levels where it fails. We will report it honestly either way. |
 | "How do you know the checker is right?" | We test it on a correct design and on deliberately broken ones *before* the model is involved, and ship those tests. |
 | "Why not just use a bigger model?" | The question is whether the *loop* makes a small model succeed — that is your challenge statement. |
-| "Can you finish in time?" | Levels 1–3 and the A/B/C comparison are the core; levels 4–5 are a stretch. One install (`iverilog`), already checked on our seat. |
+| "Can you finish in time?" | Levels 1–3 and the A/B/C comparison are the core; levels 4–8 are harder levels we add once the core works. One install (`iverilog`), already checked on our seat. |
 
 **Also ask them:**
 - [ ] The **proposal deadline** and the **submission deadline** — write them in the requirements list below
@@ -102,7 +115,10 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
       code from `kernel-agent-backup` (`agent.py`) where it helps
 - [ ] Log every attempt: level, round, feedback level, the Verilog, score, the feedback sent
 - [ ] Thinking mode **off**, prompts short (organisers measured both)
-- [ ] Levels 4–5 only if levels 1–3 work
+- [ ] Once levels 1–3 work end to end, add the **harder levels 4–8** — spec, Python reference and test
+      bench for each, tested on a correct and a deliberately broken design first, just like the core.
+      Suggested order: 4 state machine → 5 MAC → 6 FIFO → 7 systolic array → 8 pipelined MAC
+- [ ] Several people can write harder levels at the same time — one level per person, one file each
 
 ### 5. Measure (~1.5 hours)
 - [ ] For each level × feedback level A / B / C: **5 runs**; record solved-out-of-5, rounds needed, spread
@@ -125,6 +141,9 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 | 3 counter | | | |
 | 4 state machine | | | |
 | 5 MAC cell | | | |
+| 6 FIFO buffer | | | |
+| 7 2×2 systolic array | | | |
+| 8 pipelined MAC | | | |
 
 ## What the organisers require for our own project
 

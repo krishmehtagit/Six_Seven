@@ -161,6 +161,9 @@ every design, and the feedback tells it exactly which signal is wrong on which c
 | 3 | 8-bit counter with enable and reset | clocked: timing matters |
 | 4 | traffic-light state machine | states and transitions |
 | 5 | multiply-accumulate (MAC) cell | the unit Trainium's matrix engine is built from |
+| 6 | FIFO buffer (4 entries) | full/empty flags, read and write in the same cycle |
+| 7 | 2×2 systolic array | four MAC cells passing data each cycle — a mini Trainium matrix engine |
+| 8 | pipelined MAC (2 stages) | the answer arrives a cycle later; stages must stay in step |
 
 **How it works:**
 1. The model gets a short spec ("8-bit counter, counts up when `en` is 1, synchronous reset…").
