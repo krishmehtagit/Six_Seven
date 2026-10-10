@@ -8,3 +8,6 @@ checks every design, and we measure how feedback quality changes the success rat
 
 The organisers' repo, with cluster setup and the two sample projects:
 [yahavb/trainium-agent-labs](https://github.com/yahavb/trainium-agent-labs).
+
+**Team:** Krish Mehta, Dhriti Vaidya, Smruthi, Manish Reddy, Anki, Bhagavan Madala — and **Claude**
+(Anthropic's AI assistant, via Claude Code) as an AI teammate.

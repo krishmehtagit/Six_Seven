@@ -1,6 +1,6 @@
 # VeriLoop — one-page note
 
-**Team:** Six_Seven (registered as The Token Wasters) · **Event:** Hack the Chip, NYU × Annapurna Labs, 2026-10-10
+**Team:** Six_Seven (registered as The Token Wasters), with **Claude** (Anthropic, via Claude Code) as an AI teammate · **Event:** Hack the Chip, NYU × Annapurna Labs, 2026-10-10
 **Code, data and every attempt:** this repo · checker write-up: [`CHECKER.md`](CHECKER.md)
 
 > **DRAFT — numbers marked ⏳ are filled in from `results/table.md` when the last runs finish.**
