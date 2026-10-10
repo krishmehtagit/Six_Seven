@@ -101,12 +101,12 @@ benches.
 | C1 | **Checker core**: compile a `.v` with `iverilog`; on a compile error, return the line and the message in plain words | a broken `.v` gives "line 4: …" not a raw dump | `veriloop/checker.py`, `veriloop/levels/README.md` | — | Krish (via Claude) | done — 12/12 compile cases pass on seat 7 and Mac (`python veriloop/tests/test_compile.py`) |
 | C2 | **Test bench + compare**: generate a test bench from `reference.py`, run it with `vvp`, parse the outputs, compare with `reference()` | `checker.py levels/01_mux good.v` → pass; `bad_1.v` → fail | `veriloop/checker.py` | C1, L1 | Krish (via Claude) | done — 11/11 simulation cases pass on seat 7 and Mac (`python veriloop/tests/test_simulate.py`) |
 | C3 | **Score + feedback A/B/C**: score 0–1 (compiles / runs / fraction of steps correct); feedback A = pass/fail, B = "x of N steps wrong", C = first wrong step: inputs, signal, expected vs got, cycle number. **Never print the full answer.** | the three messages for a `bad_*.v` read correctly | `veriloop/checker.py` | C2 | Krish (via Claude) | done — `checker.grade()`; 9/9 feedback cases pass on seat 7 and Mac (`python veriloop/tests/test_feedback.py`) |
-| C4 | **Checker self-test**: for every level folder, `good.v` must pass and every `bad_*.v` must fail | `python veriloop/selftest.py` prints PASS for all levels written so far | `veriloop/selftest.py` | C3 | Krish (via Claude) | doing |
+| C4 | **Checker self-test**: for every level folder, `good.v` must pass and every `bad_*.v` must fail | `python veriloop/selftest.py` prints PASS for all levels written so far | `veriloop/selftest.py` | C3 | Krish (via Claude) | done — `python veriloop/selftest.py [LEVEL]`; fixtures 2/2 PASS; catches a missing port in the spec and an uncaught bad design |
 
 ## Levels — one person per level, all in parallel
 
-Each: write `spec.txt`, `reference.py`, `good.v`, `bad_1..3.v` in the folder; done when `selftest.py`
-passes for it (until C4 exists, ask the C-task person to run it).
+Each: write `spec.txt`, `reference.py`, `good.v`, `bad_1..3.v` in the folder; **done when
+`python veriloop/selftest.py veriloop/levels/NN_name` says PASS.** Copy the examples in `veriloop/tests/sim_fixtures/`.
 
 | ID | level | the tricky part to test | folder | who | status |
 |---|---|---|---|---|---|

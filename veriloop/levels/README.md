@@ -47,6 +47,16 @@ first wrong steps (inputs, signal, got vs expected). `good.v` must pass; every `
 at least one `bad_*.v` should compile but behave wrongly, so it tests the simulation and not only the
 compiler. Working examples: `veriloop/tests/sim_fixtures/` (an adder and a counter).
 
+## Prove your level is ready
+
+```bash
+python veriloop/selftest.py veriloop/levels/03_counter
+```
+
+It checks every file is there, the spec names the module and every port, `reference.py` is consistent,
+`good.v` scores 1.0, and every `bad_*.v` is caught — at least one by simulation. **A level is done when
+this says PASS.** `python veriloop/selftest.py` with no argument checks every level.
+
 ## Spec style — keep the model honest
 
 - Say **what** the block does, never **how** to build it.
