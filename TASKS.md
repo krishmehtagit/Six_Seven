@@ -142,7 +142,7 @@ Each: write `spec.txt`, `reference.py`, `good.v`, `bad_1..3.v` in the folder; **
 |---|---|---|---|---|---|---|
 | W1 🟢 | **Ask the organisers**: submission deadline, how to submit, must the repo be public — write answers in TEAM.md | the three answers in TEAM.md "What the organisers require" | `TEAM.md` (that section only) | — | | todo |
 | W2 🟢 | **One-page note** (required): what we ran, on what hardware, how many runs, the spread, the graph, the limits | `SUBMISSION.md`, one page | `SUBMISSION.md` | M2 | | todo |
-| W3 🟢 | **Checker write-up** (required): what it accepts and rejects and why; the three feedback levels; how we proved it (good/bad designs) | `CHECKER.md` | `CHECKER.md` | C3 | Krish (via Claude) | doing |
+| W3 🟢 | **Checker write-up** (required): what it accepts and rejects and why; the three feedback levels; how we proved it (good/bad designs) | `CHECKER.md` | `CHECKER.md` | C3 | Krish (via Claude) | done (draft) — `CHECKER.md`; team: please read and check |
 | W4 🟢 | **Demo script + rehearsal**: 2 minutes — the failure → the feedback → the fix → the graph | `DEMO.md` final; rehearsed once | `DEMO.md` | M4 | | todo |
 | W5 | **Final check + submit**: everything in the requirements list in TEAM.md is ticked; submit | submitted | `TEAM.md` | all | | todo |
 
