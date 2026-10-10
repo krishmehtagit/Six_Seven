@@ -27,6 +27,8 @@ straight away** (`git pull --rebase` first), so the other five always see the cu
 worked — and then hit the **same wall as level 3** (4 of its 8 rounds in run 1). One better message for
 that error could move two levels.
 
+**Fix C (T5) — `agent.failing_line` + `agent.one_d_cause`.** Every simulator error now says which kernel line raised it. For the 1-D-tile error the line is diagnosed: a reduction over axis 0 is told axis 0 is the partition axis and must never be reduced; a sliced shape like `x.shape[1:]` is told it is a one-element tuple. Traced on all 39 attempts that hit this wall.
+
 **Cut — do not spend time on these:** level 4 tiling (T6), the gpt-oss comparison (T10), adding new
 operations (softmax etc.), on-device timing. Token instrumentation is folded into T7 as a one-line extra
 (the API response already has `usage`), only if it is quick.
@@ -87,7 +89,7 @@ Status: `done` · `running` · `in progress` · `todo` · `blocked`. Only scored
 | T2 | **Fix A**: flag element-at-a-time HBM writes (level 2) | Krish | done | see section 6 |
 | T3 | **Fix B**: level-1 feedback names the route, not a list of names | Krish | done | see section 6 |
 | T4 | Measure fixes A + B, levels 1 and 2, `--repeat 5` | Krish | running | seat 7, started 11:27. Level 1 run 1/5: 0.30, but the failure **moved** — matmul gone, now the 1-D-tile wall |
-| T5 | **TOP PRIORITY.** 1-D-tile wall — blocks level 3 *and* (since fix B) level 1 | R2 | todo | the organisers measured this wall as identical every run, so a fix is cleanly attributable |
+| T5 | 1-D-tile wall — blocks level 3 *and* (since fix B) level 1 | Krish | done, to measure | 39 failures traced: 36 = `nl.sum(..., axis=[0, 1])` (reducing the partition axis), 3 = `shape=x.shape[1:]`. New message names the line and the cause; every error now carries its line. References still 1.0. Measure after T4 finishes |
 | T7 | Calibration (+ token counts if quick) | R5 | todo | |
 | T9 | Failure taxonomy over all `results/*.jsonl` | R4 | todo | start now with the baseline log (76 attempts) |
 | T11 | `SUBMISSION.md` one-pager + checker rationale | R6 | todo | |
