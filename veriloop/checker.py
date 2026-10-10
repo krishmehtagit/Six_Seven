@@ -7,7 +7,7 @@ Grades a Verilog design the model wrote. The checker is the authority: the model
     C3              score 0-1 and feedback at three levels: A pass/fail, B how many wrong, C the first wrong step
 
 Usage:
-    python checker.py levels/03_counter design.v      # compile against a level's spec (module name + ports)
+    python checker.py levels/03_counter design.v      # compile against the spec, simulate, compare
     python checker.py design.v --module counter8      # compile only, no port check
 
 Needs Icarus Verilog (`iverilog`) on the PATH -- see SERVER.md.
@@ -217,7 +217,148 @@ def compile_verilog(design_src, module, ports=None, workdir=None):
     return CompileResult(ok, [] if ok else messages, raw)
 
 
-# ---------------------------------------------------------------- C2 / C3 go below this line
+# ---------------------------------------------------------------- C2: simulate and compare
+
+SIM_TIMEOUT_S = 10
+TB = "__veriloop_tb"
+
+
+@dataclass
+class SimResult:
+    compiled: CompileResult
+    ran: bool = False            # the simulation finished and printed every step
+    problem: str = ""            # why it did not run, in plain words (empty when it ran)
+    rows: list = field(default_factory=list)        # per step: (inputs, expected, got)
+    mismatches: list = field(default_factory=list)  # per wrong signal: dict(step, signal, expected, got)
+
+    @property
+    def passed(self):
+        return self.compiled.ok and self.ran and not self.mismatches
+
+
+def _mask(value, width):
+    return int(value) & ((1 << width) - 1)
+
+
+def testbench_source(ref, vecs):
+    """A Verilog test bench that drives `vecs` into the design and prints every output after each step.
+
+    Combinational: set the inputs, wait 1 ns, print. Clocked: set the inputs while clk is low, raise clk,
+    print 1 ns after the rising edge (the contract: "the output just after that cycle's rising edge"),
+    then lower clk. Outputs are printed in binary so an undefined value (x or z) shows up as such.
+    """
+    ins, outs = ref.INPUTS, ref.OUTPUTS
+    L = ["`timescale 1ns/1ps", f"module {TB};"]
+    if ref.CLOCKED:
+        L.append("  reg clk;")
+    L += [f"  reg {_decl(n, w)};" for n, w in ins.items()]
+    L += [f"  wire {_decl(n, w)};" for n, w in outs.items()]
+    conns = (["clk"] if ref.CLOCKED else []) + list(ins) + list(outs)
+    L.append(f"  {ref.MODULE} dut(" + ", ".join(f".{n}({n})" for n in conns) + ");")
+    fmt = " ".join(f"{n}=%b" for n in outs)
+    show = f'$display("@@ %0d {fmt}", step, ' + ", ".join(outs) + ");"
+    L += ["  integer step;", "  initial begin"]
+    if ref.CLOCKED:
+        L.append("    clk = 0;")
+    for i, v in enumerate(vecs):
+        sets = " ".join(f"{n} = {w}'d{_mask(v[n], w)};" for n, w in ins.items())
+        if ref.CLOCKED:
+            L.append(f"    step = {i}; {sets} #4 clk = 1; #1 {show} #5 clk = 0;")
+        else:
+            L.append(f"    step = {i}; {sets} #1 {show}")
+    L += ["    $finish;", "  end", "endmodule"]
+    return "\n".join(L) + "\n"
+
+
+def _parse_bits(bits):
+    return None if re.search(r"[xzXZ]", bits) else int(bits, 2)
+
+
+def simulate(ref, design_src, workdir=None):
+    """Compile the design against the spec, simulate it on ref.vectors(), and compare every output with
+    ref.reference(). Returns a SimResult; C3 turns it into a score and feedback."""
+    workdir = workdir or tempfile.mkdtemp(prefix="veriloop_")
+    compiled = compile_verilog(design_src, ref.MODULE, ports_of(ref), workdir)
+    result = SimResult(compiled)
+    if not compiled.ok:
+        return result
+
+    vecs = ref.vectors()
+    want = ref.reference(vecs)
+    if len(want) != len(vecs):
+        raise ValueError(f"reference() returned {len(want)} steps for {len(vecs)} vectors")
+
+    tb = os.path.join(workdir, "tb.v")
+    with open(tb, "w") as f:
+        f.write(testbench_source(ref, vecs))
+    sim = os.path.join(workdir, "tb_sim")
+    p = subprocess.run([IVERILOG, "-g2012", "-s", TB, "-o", sim, tb, os.path.join(workdir, "design.v")],
+                       capture_output=True, text=True, timeout=COMPILE_TIMEOUT_S)
+    if p.returncode != 0:
+        # The port probe passed, so this is rare; report it rather than guess.
+        result.problem = "The design compiles alone but not inside the test bench: " + \
+            (p.stdout + p.stderr).strip().splitlines()[0]
+        return result
+
+    try:
+        run = subprocess.run(["vvp", "-n", sim], capture_output=True, text=True, timeout=SIM_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        result.problem = (f"The simulation did not finish within {SIM_TIMEOUT_S}s. Usually a loop that never "
+                          f"ends: a `while` or `for` inside an `always` block whose condition never becomes "
+                          f"false, or logic whose output feeds back into its own input.")
+        return result
+
+    got_by_step = {}
+    for line in run.stdout.splitlines():
+        if line.startswith("@@ "):
+            parts = line.split()
+            got_by_step[int(parts[1])] = {k: _parse_bits(v) for k, v in (x.split("=", 1) for x in parts[2:])}
+    if len(got_by_step) < len(vecs):
+        result.problem = (f"The simulation stopped after {len(got_by_step)} of {len(vecs)} steps. Remove any "
+                          f"`$finish`, `$stop` or `initial` block from the design -- the test bench drives it.")
+        return result
+
+    result.ran = True
+    for i, (v, w) in enumerate(zip(vecs, want)):
+        got = got_by_step[i]
+        exp = {n: _mask(w[n], width) for n, width in ref.OUTPUTS.items()}
+        result.rows.append((v, exp, got))
+        for n in ref.OUTPUTS:
+            if got.get(n) != exp[n]:
+                result.mismatches.append(dict(step=i, signal=n, expected=exp[n], got=got.get(n)))
+    return result
+
+
+# ---------------------------------------------------------------- C3 goes below this line
+
+
+def _show(value):
+    return "x (undefined)" if value is None else str(value)
+
+
+def _report_simulation(ref, design_src):
+    """Plain report for people running the CLI. (The model's feedback levels A/B/C are C3's job.)"""
+    r = simulate(ref, design_src)
+    if not r.compiled.ok:
+        print("DOES NOT COMPILE:")
+        for m in r.compiled.messages:
+            print(f"  - {m}")
+        return 1
+    if not r.ran:
+        print(f"DID NOT RUN: {r.problem}")
+        return 1
+    steps = len(r.rows)
+    if r.passed:
+        print(f"PASS: all {steps} steps match the reference")
+        return 0
+    bad_steps = sorted({m["step"] for m in r.mismatches})
+    print(f"FAIL: {len(bad_steps)} of {steps} steps wrong")
+    for m in r.mismatches[:3]:
+        inputs = r.rows[m["step"]][0]
+        unit = "cycle" if ref.CLOCKED else "step"
+        print(f"  - {unit} {m['step']}: inputs {inputs} -> `{m['signal']}` = {_show(m['got'])}, "
+              f"expected {m['expected']}")
+    return 1
 
 
 def main():
@@ -228,6 +369,8 @@ def main():
 
     if len(a.paths) == 2:
         ref = load_level(a.paths[0])
+        if hasattr(ref, "vectors") and hasattr(ref, "reference"):
+            return _report_simulation(ref, open(a.paths[1]).read())
         module, ports, design_path = ref.MODULE, ports_of(ref), a.paths[1]
     else:
         if not a.module:

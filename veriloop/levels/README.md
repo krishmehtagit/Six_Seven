@@ -41,10 +41,11 @@ Needs the simulator: on a seat it is already there (see `SERVER.md`); on a Mac, 
 python veriloop/checker.py veriloop/levels/03_counter veriloop/levels/03_counter/good.v
 ```
 
-Today (C1 done) this checks that the design **compiles with exactly the spec's module name and ports**.
-Once C2–C3 land, the same command also simulates it against `reference.py` and scores it. `good.v` must
-pass; every `bad_*.v` must fail — and at least one `bad_*.v` should compile but behave wrongly, so it
-tests the simulation and not only the compiler.
+It checks that the design **compiles with exactly the spec's module name and ports**, then simulates it
+on your `vectors()` and compares every output with your `reference()`: `PASS`, or `FAIL` with the
+first wrong steps (inputs, signal, got vs expected). `good.v` must pass; every `bad_*.v` must fail — and
+at least one `bad_*.v` should compile but behave wrongly, so it tests the simulation and not only the
+compiler. Working examples: `veriloop/tests/sim_fixtures/` (an adder and a counter).
 
 ## Spec style — keep the model honest
 
