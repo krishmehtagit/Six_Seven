@@ -7,7 +7,8 @@ Grades a Verilog design the model wrote. The checker is the authority: the model
     C3              score 0-1 and feedback at three levels: A pass/fail, B how many wrong, C the first wrong step
 
 Usage:
-    python checker.py levels/03_counter design.v      # compile against the spec, simulate, compare
+    python checker.py levels/03_counter design.v      # score it and print feedback A, B and C
+    python checker.py levels/03_counter design.v --feedback C
     python checker.py design.v --module counter8      # compile only, no port check
 
 Needs Icarus Verilog (`iverilog`) on the PATH -- see SERVER.md.
@@ -329,48 +330,121 @@ def simulate(ref, design_src, workdir=None):
     return result
 
 
-# ---------------------------------------------------------------- C3 goes below this line
+# ---------------------------------------------------------------- C3: score and feedback A / B / C
+
+# Score: 0 does not compile, 0.2 compiles (with the spec's ports) but does not run to the end,
+# 0.3 + 0.7 x (fraction of steps fully correct) once it runs. Solved means 1.0: every step right.
+W_COMPILES, W_RUNS, W_CORRECT = 0.2, 0.1, 0.7
+MAX_EXAMPLES = 3     # never show more wrong rows than this: the model must not be handed the whole answer
+CONTEXT = 2          # clocked levels: how many cycles before the first wrong one to show
+
+
+@dataclass
+class Grade:
+    score: float
+    solved: bool
+    stage: str           # "compile" | "run" | "behaviour" | "solved" -- where it stopped
+    feedback: dict       # {"A": ..., "B": ..., "C": ...}, all from the same simulation
+    sim: SimResult
 
 
 def _show(value):
     return "x (undefined)" if value is None else str(value)
 
 
-def _report_simulation(ref, design_src):
-    """Plain report for people running the CLI. (The model's feedback levels A/B/C are C3's job.)"""
-    r = simulate(ref, design_src)
-    if not r.compiled.ok:
-        print("DOES NOT COMPILE:")
-        for m in r.compiled.messages:
-            print(f"  - {m}")
-        return 1
-    if not r.ran:
-        print(f"DID NOT RUN: {r.problem}")
-        return 1
-    steps = len(r.rows)
-    if r.passed:
-        print(f"PASS: all {steps} steps match the reference")
-        return 0
-    bad_steps = sorted({m["step"] for m in r.mismatches})
-    print(f"FAIL: {len(bad_steps)} of {steps} steps wrong")
-    for m in r.mismatches[:3]:
-        inputs = r.rows[m["step"]][0]
-        unit = "cycle" if ref.CLOCKED else "step"
-        print(f"  - {unit} {m['step']}: inputs {inputs} -> `{m['signal']}` = {_show(m['got'])}, "
-              f"expected {m['expected']}")
-    return 1
+def _vals(d):
+    return " ".join(f"{k}={_show(v)}" for k, v in d.items())
+
+
+def score_of(sim):
+    if not sim.compiled.ok:
+        return 0.0
+    if not sim.ran:
+        return W_COMPILES
+    steps = len(sim.rows)
+    wrong = len({m["step"] for m in sim.mismatches})
+    return round(W_COMPILES + W_RUNS + W_CORRECT * (steps - wrong) / steps, 3) if steps else 0.0
+
+
+def _first_wrong_c(ref, sim):
+    """Feedback C for a design that runs but is wrong: WHERE it first goes wrong, as an engineer would
+    read it off a waveform -- the inputs, the signal, what it gave, what was expected, and for a clocked
+    design the cycles just before. A few examples at most, never the whole table."""
+    unit = "cycle" if ref.CLOCKED else "test"
+    first = min(m["step"] for m in sim.mismatches)
+    lines = []
+    if ref.CLOCKED:
+        for i in range(max(0, first - CONTEXT), first + 1):
+            v, exp, got = sim.rows[i]
+            wrong = [n for n in ref.OUTPUTS if got.get(n) != exp[n]]
+            if not wrong:
+                lines.append(f"  {unit} {i}: inputs {_vals(v)} -> {_vals(got)} (correct)")
+            else:
+                outs = ", ".join(f"`{n}` = {_show(got.get(n))}, expected {exp[n]}" for n in wrong)
+                lines.append(f"  {unit} {i}: inputs {_vals(v)} -> {outs}   <-- first wrong {unit}")
+    else:
+        # One example per wrong signal first (so no broken output goes unmentioned), then more rows.
+        firsts = {}
+        for m in sim.mismatches:
+            firsts.setdefault(m["signal"], m)
+        picks = list(firsts.values())
+        picks += [m for m in sim.mismatches if m not in picks]
+        for m in picks[:MAX_EXAMPLES]:
+            v, exp, _ = sim.rows[m["step"]]
+            lines.append(f"  inputs {_vals(v)} -> `{m['signal']}` = {_show(m['got'])}, expected {exp[m['signal']]}")
+    undefined = any(m["got"] is None for m in sim.mismatches)
+    note = ("\nAn output is x (undefined): it is never given a value on some path -- check that every "
+            "output is assigned, and that reset sets every register." if undefined else "")
+    return "\n".join(lines) + note
+
+
+def feedback_of(ref, sim):
+    """The three feedback levels for the experiment, from one simulation. Each one adds information:
+    A only the verdict; B how much is wrong; C where and how it first goes wrong."""
+    steps = len(sim.rows)
+    if sim.passed:
+        msg = f"PASS: correct on all {steps} tests."
+        return {"A": "PASS.", "B": msg, "C": msg}
+    a = "FAIL: the design is not correct."
+    if not sim.compiled.ok:
+        return {"A": a,
+                "B": f"FAIL: the design does not compile ({len(sim.compiled.messages)} problem(s)).",
+                "C": "FAIL: the design does not compile.\n" + "\n".join(f"- {m}" for m in sim.compiled.messages)}
+    if not sim.ran:
+        return {"A": a, "B": "FAIL: the design compiles, but the simulation did not run to the end.",
+                "C": f"FAIL: the design compiles, but the simulation did not run to the end. {sim.problem}"}
+    wrong = len({m["step"] for m in sim.mismatches})
+    signals = sorted({m["signal"] for m in sim.mismatches})
+    b = f"FAIL: {wrong} of {steps} tests give a wrong output."
+    c = (f"FAIL: {wrong} of {steps} tests give a wrong output, on "
+         + ", ".join(f"`{s}`" for s in signals) + ".\n" + _first_wrong_c(ref, sim))
+    return {"A": a, "B": b, "C": c}
+
+
+def grade(ref, design_src):
+    """Compile, simulate, score, and write all three feedback levels. The one call the agent needs."""
+    sim = simulate(ref, design_src)
+    stage = ("compile" if not sim.compiled.ok else "run" if not sim.ran
+             else "solved" if sim.passed else "behaviour")
+    return Grade(score_of(sim), sim.passed, stage, feedback_of(ref, sim), sim)
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("paths", nargs="+", help="[LEVEL_DIR] DESIGN.v")
     ap.add_argument("--module", help="module name, when no level folder is given")
+    ap.add_argument("--feedback", choices=["A", "B", "C", "all"], default="all",
+                    help="which feedback level to print (default: all three)")
     a = ap.parse_args()
 
     if len(a.paths) == 2:
         ref = load_level(a.paths[0])
         if hasattr(ref, "vectors") and hasattr(ref, "reference"):
-            return _report_simulation(ref, open(a.paths[1]).read())
+            g = grade(ref, open(a.paths[1]).read())
+            print(f"score {g.score:.2f}   stage: {g.stage}   {'SOLVED' if g.solved else 'not solved'}")
+            for lvl in ("A", "B", "C") if a.feedback == "all" else (a.feedback,):
+                print(f"\n--- feedback {lvl} ---\n{g.feedback[lvl]}")
+            return 0 if g.solved else 1
         module, ports, design_path = ref.MODULE, ports_of(ref), a.paths[1]
     else:
         if not a.module:
