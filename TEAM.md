@@ -57,7 +57,7 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - [x] Fits the rules: the model runs on our Trainium chip; the checker (a Verilog simulator) runs on the
       CPU, exactly like both organiser sample projects
 
-### 2. Approval — now, before anything is built
+### 2. Approval — ✅ done: approved by an Annapurna engineer
 
 **Who goes:** two people — one who explains, one who takes notes. Bring a laptop with this page open.
 
@@ -94,11 +94,11 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - [ ] Whether our repo must be **public** for judging
 
 **Outcome:**
-- [ ] **Approved** → start phase 3 at once
+- [x] **Approved** → start phase 3 at once
 - [ ] Changes requested → write them here, adjust, and go back if needed
 - [ ] Not approved → fall back to the kernel-agent work on branch `kernel-agent-backup`
 
-### 3. Build the checker first (~1 hour)
+### 3. Build the checker first (~1 hour) — ▶️ NOW
 - [ ] Install `iverilog` on each seat that runs experiments (`apt-get install -y iverilog`)
 - [ ] For levels 1–3: the spec (3–5 lines each), a Python reference model, and a test bench that
       tries every input (combinational) or a test sequence with edge cases (clocked: reset, enable off,
@@ -148,7 +148,7 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 ## What the organisers require for our own project
 
 - [ ] **It runs on the hardware they gave us** (our seats: one Trainium chip each, with the Qwen3-8B model)
-- [ ] **Approved by an Annapurna engineer** before the proposal deadline — originally 11:30, postponed; new time: **__:__**
+- [x] **Approved by an Annapurna engineer**
 - [ ] **A checker**: something that grades each attempt, plus our reasoning for what it accepts and rejects
 - [ ] **An attempt log**: every attempt with its score
 - [ ] **A one-page note**: what we ran, on what, how many runs, and the spread
@@ -159,7 +159,7 @@ go back to the model → it tries again, until it solves the problem or says hon
 
 ## Where we are
 
-- **Idea chosen: VeriLoop.** Next step: pitch it for approval (phase 2).
+- **VeriLoop is approved** by an Annapurna engineer. Now: phase 3, build the checker.
 - Seat 7 is set up and the model is running on it.
 - Team repo: this one. Members: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax, Bhagavanmadala.
 - Earlier work on the organisers' kernel-agent challenge is kept on the branch
