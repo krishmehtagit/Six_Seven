@@ -167,15 +167,9 @@ go back to the model → it tries again, until it solves the problem or says hon
 - Earlier work on the organisers' kernel-agent challenge is kept on the branch
   [`kernel-agent-backup`](https://github.com/krishmehtagit/Six_Seven/tree/kernel-agent-backup), in case we need a fallback.
 
-## Getting on your seat (each person, once)
+## Getting on your seat (the server)
 
-```bash
-brew install awscli kubectl
-# paste the macOS/Linux credentials block from the workshop channel into THIS terminal
-aws eks update-kubeconfig --name hack-hyd --region ap-south-2
-kubectl get pod seat-<N>                 # want 1/1 Running
-kubectl exec -it seat-<N> -- bash        # wait for root@seat-<N>:/workspace#
-./serve.sh                               # ~4 min, prints READY; leave this terminal open
-```
+Full step-by-step guide — install, connect, start the model, install the simulator, copy code over,
+run long jobs, fix common errors — is in **[`SERVER.md`](SERVER.md)**. Add your seat number there.
 
 **Never commit the AWS credentials.** They are shared by the whole event.

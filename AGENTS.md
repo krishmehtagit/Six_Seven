@@ -45,6 +45,7 @@ the hardware provided and be approved by an Annapurna engineer.
 |---|---|---|
 | `TEAM.md` | the plan, phase by phase, and the requirements checklist — the single source of truth | everyone |
 | `TASKS.md` | the task board: every task, the exact files it owns, dependencies, and who is doing it | everyone (own row only) |
+| `SERVER.md` | how to get on your seat (the server), start the model, copy code and results, fix errors; seat numbers | everyone (own row in the seats table) |
 | `IDEAS.md` | candidate project ideas in one short format, each credited to its author | everyone |
 | `idea1.md` | Dhritii07's original full write-up of idea 1 (ShapeGuard) | Dhritii07 |
 | `README.md` | short intro, points here and to TEAM.md | everyone |
@@ -76,6 +77,6 @@ the hardware provided and be approved by an Annapurna engineer.
 Each person has a "seat": a Kubernetes pod (`seat-<number>`) on the organisers' cluster with one Trainium
 chip (4 cores, 96 GB) and the Qwen3-8B model, which they start with `./serve.sh` inside the pod. The
 model answers on `http://localhost:8000` (OpenAI-compatible API) inside the pod. Access steps are in
-TEAM.md. Each person uses only their own seat. Lessons the organisers measured: keep the model's
+[`SERVER.md`](SERVER.md). Each person uses only their own seat. Lessons the organisers measured: keep the model's
 "thinking" mode **off**, keep prompts short, put rules in the checker rather than the prompt, and never
 print the target answer in feedback (the model copies it).
