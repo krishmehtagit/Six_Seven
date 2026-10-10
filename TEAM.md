@@ -5,7 +5,7 @@ Whenever anything changes, commit and push straight away (`git pull --rebase` fi
 
 ## Our idea
 
-**To be decided by the team.** Write it here in 2–3 lines once agreed.
+**To be decided by the team.** Candidates are in [`IDEAS.md`](IDEAS.md). Write the chosen one here in 2–3 lines once agreed.
 
 ## Plan — phase by phase
 
