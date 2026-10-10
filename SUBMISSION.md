@@ -3,7 +3,7 @@
 **Team:** Six_Seven (registered as The Token Wasters), with **Claude** (Anthropic, via Claude Code) as an AI teammate · **Event:** Hack the Chip, NYU × Annapurna Labs, 2026-10-10
 **Code, data and every attempt:** this repo · checker write-up: [`CHECKER.md`](CHECKER.md)
 
-> **DRAFT — numbers marked ⏳ are filled in from `results/table.md` when the last runs finish.**
+> **DRAFT — the 12-round level-4 row and calibration (⏳) are filled in when those runs finish (~4:45 pm).**
 
 ## The question
 
@@ -28,30 +28,40 @@ everything else fixed and change only the feedback:
 - **One run** = up to 6 rounds × 4 attempts; it stops when a design passes every test. The prompt is
   identical for A, B and C except for the feedback line.
 
-## Results ⏳
+## Results
 
 | level | A pass/fail | B how many wrong | C where it goes wrong |
 |---|---|---|---|
 | 1–3 mux, adder, counter | 24/24 solved, round 1 | 24/24, round 1 | 24/24, round 1 |
-| 4 traffic light | ⏳ | ⏳ | ⏳ |
-| 5 MAC cell | ⏳ | ⏳ | ⏳ |
-| 6 FIFO | ⏳ | ⏳ | ⏳ |
+| 4 traffic light (6 rounds) | 0/8 · 0.65 (0.61–0.74) | 0/8 · 0.65 (0.61–0.74) | 0/8 · **0.69** (0.61–0.78) |
+| 4 traffic light (12 rounds) | ⏳ | ⏳ | ⏳ |
+| 5 MAC cell | 3/3 · 1.00, round 2 | 3/3 · 1.00, round 2 | 3/3 · 1.00, round 2 |
+| 6 FIFO | 0/3 · 0.34 (0.32–0.36) | 0/3 · 0.35 (0.33–0.36) | 0/3 · 0.33 (0.32–0.33) |
 
 Each cell: solved / runs, mean best score (min–max). Graph: `results/graph.png`. Full table:
 `results/table.md`. Every attempt, with the design and the feedback sent: `results/*_attempts.jsonl`.
 
-## What we found ⏳
+## What we found
 
 1. **Easy blocks do not need feedback at all:** levels 1–3 were solved on the first try in every run, with
    every feedback level (72/72).
-2. ⏳ level 4–6 result: does C solve more often / score higher than A and B?
-3. **A greedy-ish model goes in circles.** In the pilot, the model sent back the *identical* design for 6
+2. **On hard blocks, better feedback did not turn failures into solves — yet.** Level 4: 0/24 solved with
+   any feedback; feedback C reached a slightly higher best score (0.69 vs 0.65 for A and B, n = 8 each — a
+   small gap, within the spread). Level 6: 0/9 with any feedback, scores ~0.34. Level 5 was fixed on round 2
+   with A, B *and* C. With this model and 6 rounds, *where* the error is does not yet beat *that* there is
+   one. ⏳ 12 rounds: does C pull ahead given more time?
+3. **The failures are systematic, not random** (`results/TAXONOMY.md`, 1,020 failed attempts, 183 distinct
+   designs). Level 4: 67% hold a light one phase too long (wrong cycle counting). Level 5: every round-1
+   failure is the same — the model widens port `b` to 9 bits, writing in a comment that it is "to handle
+   signed multiplication". Level 6: 99% put the wrong byte on `dout` while writing. One wrong idea, repeated —
+   which is why the model's own retries rarely escape it.
+4. **A greedy-ish model goes in circles.** In the pilot, the model sent back the *identical* design for 6
    rounds while being told exactly which cycle was wrong. Telling it that it repeated itself, and giving
    each attempt a distinct prompt header, was necessary before any comparison meant anything.
-4. **"8 runs" can secretly be 2.** The model is nearly deterministic for code: separate runs on separate
+5. **"8 runs" can secretly be 2.** The model is nearly deterministic for code: separate runs on separate
    chips produced byte-identical designs. We fingerprinted every design to check our runs are independent,
    fixed it, and report only runs made after the fix.
-5. ⏳ calibration: does the model know when its design is wrong? (`calibrate.py`)
+6. ⏳ calibration: does the model know when its design is wrong? (`calibrate.py`)
 
 ## Honesty notes
 
