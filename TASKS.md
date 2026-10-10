@@ -97,7 +97,7 @@ benches.
 
 | ID | task | done when | files | depends on | who | status |
 |---|---|---|---|---|---|---|
-| S1 | Install the simulator on seat 7 and write the one-line install for everyone | `iverilog -V` works on seat 7; the command is in SERVER.md | `SERVER.md` (install section only) | — | | todo |
+| S1 | Install the simulator on seat 7 and write the one-line install for everyone | `iverilog -V` works on seat 7; the command is in SERVER.md | `SERVER.md` (install section only) | — | Krish (via Claude) | done — Icarus Verilog 12.0 on seat 7; tested a 4-bit adder |
 | C1 | **Checker core**: compile a `.v` with `iverilog`; on a compile error, return the line and the message in plain words | a broken `.v` gives "line 4: …" not a raw dump | `veriloop/checker.py`, `veriloop/levels/README.md` | — | | todo |
 | C2 | **Test bench + compare**: generate a test bench from `reference.py`, run it with `vvp`, parse the outputs, compare with `reference()` | `checker.py levels/01_mux good.v` → pass; `bad_1.v` → fail | `veriloop/checker.py` | C1, L1 | | todo |
 | C3 | **Score + feedback A/B/C**: score 0–1 (compiles / runs / fraction of steps correct); feedback A = pass/fail, B = "x of N steps wrong", C = first wrong step: inputs, signal, expected vs got, cycle number. **Never print the full answer.** | the three messages for a `bad_*.v` read correctly | `veriloop/checker.py` | C2 | | todo |
