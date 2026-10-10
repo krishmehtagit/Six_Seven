@@ -131,8 +131,8 @@ Each: write `spec.txt`, `reference.py`, `good.v`, `bad_1..3.v` in the folder; **
 
 | ID | task | done when | files | depends on | who | status |
 |---|---|---|---|---|---|---|
-| M1 | **Run the experiments** on your own seat: `nohup python run_experiment.py --tag <you> --levels levels/NN_a levels/NN_b --runs 5 > run.log 2>&1 < /dev/null &` — split levels between seats so each seat runs different ones | `results/<date>_<you>_summary.csv` + `_attempts.jsonl` copied into the repo's `results/` | `results/` (new files only, named `<date>_<who>_<what>`) | A4 | | todo |
-| M2 | **Results table + graph**: solve rate per level × A/B/C, with spread; fill the table in TEAM.md | `results/graph.png` exists; TEAM.md table filled | `veriloop/plot.py`, `results/graph.png`, `TEAM.md` (results table only) | M1 | | todo |
+| M1 | **Run the experiments** on your own seat: `nohup python run_experiment.py --tag <you> --levels levels/NN_a levels/NN_b --runs 5 > run.log 2>&1 < /dev/null &` — split levels between seats so each seat runs different ones | `results/<date>_<you>_summary.csv` + `_attempts.jsonl` copied into the repo's `results/` | `results/` (new files only, named `<date>_<who>_<what>`) | A4 | Krish (via Claude) | doing |
+| M2 | **Results table + graph**: solve rate per level × A/B/C, with spread; fill the table in TEAM.md | `results/graph.png` exists; TEAM.md table filled | `veriloop/plot.py`, `results/graph.png`, `TEAM.md` (results table only) | M1 | Krish (via Claude) | doing |
 | M3 🟢 | **Failure taxonomy**: read the failed attempts in the logs; group the mistakes (e.g. "reset is asynchronous", "off by one cycle", "wrong bit width", "does not compile") and count them per level | `results/TAXONOMY.md` with a table of types × counts and one example each | `results/TAXONOMY.md` | first logs from A2 | | todo |
 | M4 🟢 | **Pick the demo case**: find a run where an early round fails and a later round succeeds *because of* feedback C | case written in `DEMO.md` with the round-by-round story | `DEMO.md` | M1 | | todo |
 
@@ -142,7 +142,7 @@ Each: write `spec.txt`, `reference.py`, `good.v`, `bad_1..3.v` in the folder; **
 |---|---|---|---|---|---|---|
 | W1 🟢 | **Ask the organisers**: submission deadline, how to submit, must the repo be public — write answers in TEAM.md | the three answers in TEAM.md "What the organisers require" | `TEAM.md` (that section only) | — | | todo |
 | W2 🟢 | **One-page note** (required): what we ran, on what hardware, how many runs, the spread, the graph, the limits | `SUBMISSION.md`, one page | `SUBMISSION.md` | M2 | | todo |
-| W3 🟢 | **Checker write-up** (required): what it accepts and rejects and why; the three feedback levels; how we proved it (good/bad designs) | `CHECKER.md` | `CHECKER.md` | C3 | | todo |
+| W3 🟢 | **Checker write-up** (required): what it accepts and rejects and why; the three feedback levels; how we proved it (good/bad designs) | `CHECKER.md` | `CHECKER.md` | C3 | Krish (via Claude) | doing |
 | W4 🟢 | **Demo script + rehearsal**: 2 minutes — the failure → the feedback → the fix → the graph | `DEMO.md` final; rehearsed once | `DEMO.md` | M4 | | todo |
 | W5 | **Final check + submit**: everything in the requirements list in TEAM.md is ticked; submit | submitted | `TEAM.md` | all | | todo |
 
