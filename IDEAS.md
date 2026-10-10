@@ -17,6 +17,7 @@ Add your idea at the bottom using the same format. Keep it short.
 | 3 | Logic designer (digital) (suggested by Claude) | writes a Boolean expression / logic for a truth table | tries every input combination | very good | may be too easy for the model |
 | 4 | SQL helper (suggested by Claude) | writes a SQL query for a question | runs it and compares the result rows | good | not hardware-themed |
 | 5 | Heat-rod + training (organisers' suggestion) | the organisers' solved physics project, then train the model on its own attempts | the existing physics checker | ok | training on the chip is new to us |
+| **6** | **VeriLoop — the model designs chip hardware (suggested by Claude) — our best shot** | writes Verilog (the language chips are designed in) for a hardware block | simulates it on every input and names the exact signal, cycle and input that is wrong | **best** | one install (`iverilog`); levels must be tuned so the model is challenged |
 
 ---
 
@@ -122,6 +123,75 @@ on its own graded attempts, so it gets better instead of just retrying.
 across training steps, on our own chip.
 
 **Risk:** training a model on the chip is new to all of us and may not finish in a day.
+
+---
+
+## Idea 6 — VeriLoop: the model designs chip hardware (suggested by Claude) — our best shot
+
+**One line:** the small model on the chip designs digital hardware blocks in Verilog, a simulator checks
+every design, and the feedback tells it exactly which signal is wrong on which clock cycle — and we
+**measure** how much better feedback makes it.
+
+**Why this could win:**
+- **It speaks the judges' language.** Annapurna Labs *designs chips*. An agent that writes and verifies
+  hardware is their daily work, and the top level is the building block of Trainium itself (a matrix-
+  multiply cell). Our EE background fits exactly.
+- **The checker is perfect and cheap.** A simulator runs the design on every input (or thousands of
+  random + edge-case inputs for clocked designs) and compares it to a simple Python reference. It never
+  needs to know the answer, and it can point at the exact failure.
+- **We prove the organisers' main claim with a graph.** Their whole message is "the checker's feedback
+  decides whether the loop works". Their own README suggests: *make the checker worse on purpose and
+  measure how much slower the agent gets — the clearest evidence for the claim*. Nobody else is likely to
+  do this cleanly. We run the same levels with three feedback levels, 5 runs each:
+  1. **Pass/fail only** — "wrong"
+  2. **Verdict** — "12 of 16 inputs wrong"
+  3. **Named fix** — "on cycle 7, `count` went 9 → 0, it should go 9 → 10: the reset condition fires one
+     count too early"
+
+  and plot **solve rate vs. feedback quality**. That graph is the result.
+- **Honesty built in.** The agent reports how sure it is; we check that against the simulator.
+
+**The levels (easy → hard):**
+
+| level | hardware block | why it is harder |
+|---|---|---|
+| 1 | 4-to-1 multiplexer | warm-up, proves the loop works |
+| 2 | 4-bit adder with carry out | carry chain |
+| 3 | 8-bit counter with enable and reset | clocked: timing matters |
+| 4 | traffic-light state machine | states and transitions |
+| 5 | multiply-accumulate (MAC) cell | the unit Trainium's matrix engine is built from |
+
+**How it works:**
+1. The model gets a short spec ("8-bit counter, counts up when `en` is 1, synchronous reset…").
+2. It writes a Verilog module.
+3. The **checker** compiles it with `iverilog` and simulates it against a Python reference on all inputs
+   (combinational) or a test sequence with edge cases (clocked).
+4. Feedback at the chosen level goes back; the model tries again. Every attempt is logged with its score.
+
+**Demo (2 minutes):** level 4, the state machine. Round 0: the light goes yellow → red one cycle late. The
+checker says exactly that. Round 2: fixed, all cycles pass. Then show the graph: with pass/fail-only
+feedback the same model solves it 0 of 5 times; with our feedback, N of 5.
+
+**What we hand in:** the checker (simulator + reference + feedback rules), the attempt log, the one-page
+note with the solve-rate table and graph, and the demo.
+
+**Plan for the day (fits ~5 hours):**
+- Hour 1: install `iverilog` on our seats; write the checker for levels 1–2; test it on a correct and a
+  deliberately broken design *before* the model is involved.
+- Hour 2: connect the model (reuse the loop from our kernel-agent backup branch); levels 3–5.
+- Hours 3–4: run the three feedback levels × 5 runs; fill the table.
+- Last hour: graph, one-page note, demo rehearsal.
+
+**Risks and answers:**
+- *The model may already be perfect at easy levels* → that is fine; levels 3–5 are where it struggles,
+  and the ablation still shows the difference.
+- *Needs one install* → `apt-get install iverilog` works on our seats (checked: they have internet).
+- *The hardware rule* → the model runs on our Trainium chip; the checker runs on the CPU, exactly like
+  both organiser sample projects.
+
+**Pitch to the Annapurna engineer, in one sentence:**
+> "A small model on your chip designs chip hardware, a simulator grades every design down to the exact
+> signal and cycle, and we measure how much the quality of that feedback changes the success rate."
 
 ---
 
