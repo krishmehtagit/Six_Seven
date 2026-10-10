@@ -142,6 +142,12 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
   the harder levels 4–8.** Make their specs precise and their tests thorough.
 - **Sampling:** at temperature 0.7 the model gave 4 identical answers out of 4; at 1.0 they differ, so the
   agent uses 1.0. On a very easy task it still repeats itself, which is expected.
+- **Level 4 (traffic light) is hard enough:** on round 0 all 4 attempts failed (scores 0.61–0.66). This
+  is the first level where feedback can make a difference. Experiment running on seat 7: A/B/C × 5
+  runs, 6 rounds each.
+- **It is slow:** the model writes ~500–700 tokens per design at ~7 tokens/s, so a round takes ~100 s and
+  one seat needs ~2 h for one hard level. **More seats = faster results** — every teammate who starts
+  their seat (SERVER.md) can run part of the experiment with `run_experiment.py --tag <you>`.
 - **Never send `seed` to the model server** — it crashed seat 7's server (restarted, back up).
 
 ## Results (fill in from real runs only)
