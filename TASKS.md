@@ -112,7 +112,7 @@ Each: write `spec.txt`, `reference.py`, `good.v`, `bad_1..3.v` in the folder; **
 |---|---|---|---|---|---|
 | L1 | 1 — 4-to-1 multiplexer **and** 2 — 4-bit adder with carry out | adder: carry out on 15 + 1 | `veriloop/levels/01_mux/`, `veriloop/levels/02_adder/` | | todo |
 | L3 | 3 — 8-bit counter, enable + synchronous reset | wrap 255 → 0; enable off holds; reset mid-count | `veriloop/levels/03_counter/` | | todo |
-| L4 | 4 — traffic-light state machine (green 3 cycles → yellow 1 → red 2 → …) | exact cycle of each change; reset | `veriloop/levels/04_traffic_fsm/` | Krish (via Claude) | doing |
+| L4 | 4 — traffic-light state machine (green 3 cycles → yellow 1 → red 2 → …) | exact cycle of each change; reset | `veriloop/levels/04_traffic_fsm/` | Krish (via Claude) | done — selftest PASS (256 tests; 5 bad designs all caught in simulation); experiment running on seat 7 |
 | L5 | 5 — multiply-accumulate cell: `acc <= acc + a*b`, clear input | overflow width; clear | `veriloop/levels/05_mac/` | | todo |
 | L6 | 6 — 4-entry FIFO with full/empty flags | read + write in the same cycle; full and empty edges | `veriloop/levels/06_fifo/` | | todo |
 | L7 | 7 — 2×2 systolic array of MAC cells | data passes to neighbours each cycle; result timing | `veriloop/levels/07_systolic_2x2/` | | todo |
