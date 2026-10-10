@@ -126,7 +126,8 @@ def grade(source, level):
                     f"CANNOT SIMULATE: {e}")
         except Exception as e:
             failures.append((nkibench.label(case, level),
-                             enrich(f"raised {type(e).__name__}: {e}")))
+                             enrich(f"raised {type(e).__name__}: {e}",
+                                    failing_line(e, path, source))))
             continue
         parts["runs"] = True
         m = (nkibench.check_inputs_untouched(before, args)
@@ -289,8 +290,56 @@ def real_signature(func_name):
     return ""
 
 
-def enrich(error_text):
-    """Add the real names when the failure is an invented API call."""
+def failing_line(exc, path, source):
+    """The kernel's own line that raised, as (number, text), or None.
+
+    The simulator runs the kernel as ordinary Python, so its traceback has a frame in the candidate
+    file. Without this the agent is told what broke but never where.
+    """
+    import traceback
+    frames = [f for f in traceback.extract_tb(exc.__traceback__) if f.filename == path]
+    if not frames:
+        return None
+    n = frames[-1].lineno
+    lines = source.splitlines()
+    return (n, lines[n - 1].strip()) if 0 < n <= len(lines) else None
+
+
+def one_d_cause(line):
+    """Why a tile came out 1-D, named from the line that made it.
+
+    Measured over 39 attempts that hit this error (baseline + the fix A+B level-1 runs): 36 were
+    `nl.sum(tile, axis=[0, 1])` -- a reduction over axis 0, the PARTITION axis, which collapses it --
+    and 3 were `nl.ndarray(shape=lhsT.shape[1:], ...)`, a one-element shape. The old message ("give a
+    vector the shape (1, N)") named neither, and the model repeated the same line round after round.
+    """
+    generic = (" Every SBUF and PSUM tile needs two dimensions: the partition dimension first, then "
+               "at least one free dimension.")
+    if not line:
+        return generic
+    n, text = line
+    where = f" Line {n}: `{text}` produced a tile with fewer than 2 dimensions."
+    m = re.search(r"axis\s*=\s*\[?\s*([^\])]*)", text)
+    if re.search(r"\b(sum|max|min|mean|prod|tensor_reduce)\s*\(", text) and m \
+            and "0" in [a.strip() for a in m.group(1).split(",")]:
+        return (where + " Axis 0 is the PARTITION axis, and reducing over it collapses the partition "
+                "dimension, leaving a 1-D result. Never reduce over axis 0: keep the axis you are NOT "
+                "reducing (for pooling, the channels C) on the partition axis, and reduce only over "
+                "free axes (axis 1 and up).")
+    if re.search(r"shape\s*\[\s*-?\d*\s*:\s*\]", text):
+        return (where + " Slicing a shape tuple, like `x.shape[1:]`, keeps only the dimensions after "
+                "the cut, so here it is a one-element tuple. Write the 2-D shape out explicitly as "
+                "(rows, cols). A matmul result has one dimension from each operand: (M, N), with M "
+                "from lhsT and N from rhs.")
+    return where + generic
+
+
+def enrich(error_text, line=None):
+    """Add the real names when the failure is an invented API call. `line` is (number, text) of the
+    kernel line that raised, when known; every message gets it, since a message without a location
+    sends the model to re-check code that was fine."""
+    if line and "must have at least 2 dimensions" not in error_text:
+        error_text += f" (raised at line {line[0]}: `{line[1]}`)"
     if "'MemoryRegion' object is not callable" in error_text:
         return (error_text + " nl.sbuf, nl.psum and nl.shared_hbm are memory regions, not "
                 "functions. Do not call them. Allocate with "
@@ -374,10 +423,7 @@ def enrich(error_text):
         return (error_text + " Pass every argument by keyword, e.g. "
                 "nisa.nc_matmul(dst=..., stationary=..., moving=...), so none is bound twice.")
     if "must have at least 2 dimensions" in error_text:
-        return (error_text + " Every SBUF and PSUM tile needs two dimensions: a partition dimension "
-                "first, then a free dimension. A 1-D tile is not allowed, so write "
-                "nl.ndarray((rows, cols), ...) and give a length-N vector the shape (1, N) or "
-                "(N, 1) depending on which axis you are reducing over.")
+        return error_text + one_d_cause(line)
     if "cannot reshape array of size" in error_text:
         return (error_text + " Do not reshape. Work with the shapes you were given and slice "
                 "them into tiles, e.g. src=a[0:128, 0:64].")
