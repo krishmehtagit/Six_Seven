@@ -155,6 +155,12 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
   (`light = YELLOW (2), expected GREEN (1)`). Pilot data kept separately; not mixed with the real runs.
 - **Main experiment running on 8 seats** (30, 31, 33, 230–234): levels 1–4 × feedback A/B/C, one run per
   seat → 8 runs per setting.
+- **Runs on different seats were copies, not independent samples.** For code, the model is nearly
+  deterministic: the same prompt gave byte-identical designs on different chips (seats 230, 231, 234
+  matched in rounds 1–2). So "8 runs" were really 2–3. Fix: every prompt starts with a run- and
+  attempt-specific tag (`[session 3f2a-2]`), no information about the answer, same for A/B/C. Level 4
+  restarted on all 8 seats with it; levels 1–3 (all solved on round 0) kept. **When we report n, we
+  report distinct runs — and check them.**
 - **Never send `seed` to the model server** — it crashed seat 7's server (restarted, back up).
 
 ## Results (fill in from real runs only)

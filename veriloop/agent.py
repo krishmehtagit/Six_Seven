@@ -64,11 +64,16 @@ def repair_prompt(spec, design, feedback, repeated=False):
             + f"Fix the design. {FORMAT}")
 
 
-def variant(prompt, i):
-    """A different last line per attempt in a round. Measured in the pilot: with identical prompts the 4
-    attempts were usually byte-identical, so 4 attempts bought 1. A different suffix starts each attempt
-    down a different path; it carries no information about the answer."""
-    return prompt if i == 0 else f"{prompt}\n(Attempt {i + 1}.)"
+def variant(prompt, i, session=""):
+    """A short tag at the top of every prompt, unique per run and per attempt: `[session 3f2a-2]`.
+
+    Measured on the seats: for code this model is nearly deterministic -- the same prompt gives the same
+    design on any chip, even at temperature 1.0. Without the tag, 4 attempts in a round were often
+    identical, and runs on different seats followed the very same path (seats 230, 231, 234 produced
+    byte-identical designs in rounds 1-2), so "8 runs" were really 2-3. A different first line sends each
+    attempt and each run down its own path. It carries no information about the answer, and it is the
+    same treatment for feedback A, B and C."""
+    return f"[session {session}-{i + 1}]\n{prompt}"
 
 
 _FENCE = re.compile(r"```[ \t]*(?:verilog|systemverilog|sv|v)?[ \t]*\n(.*?)```", re.S | re.I)
@@ -146,6 +151,7 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
     say = (lambda *a: None) if quiet else print
     log = open(log_path, "a") if log_path else None
 
+    session = __import__("hashlib").md5(run_id.encode()).hexdigest()[:4]   # unique per run, stable within it
     say(f"=== {level}   feedback {feedback}   {rounds} rounds x {samples} attempts   run {run_id}")
     prev_design, prev_feedback, best = None, None, None
     seen, sent, prev_repeated = set(), set(), False
@@ -157,7 +163,7 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
             replies = offline_replies(level_dir, samples, rnd)
         else:
             with cf.ThreadPoolExecutor(max_workers=samples) as ex:   # the server runs 4 sequences at once
-                replies = list(ex.map(lambda i: ask(variant(prompt, i), base_url, model), range(samples)))
+                replies = list(ex.map(lambda i: ask(variant(prompt, i, session), base_url, model), range(samples)))
 
         graded = []
         totals["seconds"] += max(r[1]["seconds"] for r in replies)   # attempts in a round run in parallel
