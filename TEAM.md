@@ -8,6 +8,25 @@ Upstream (the organisers' repo, read-only for us): https://github.com/yahavb/tra
 
 ---
 
+## 0. Plan for the day
+
+Times after 12:00 are **tentative** until we know the submission deadline (T13). Fill it in when you hear it.
+
+| when | phase | who | done means |
+|---|---|---|---|
+| ~11:40 – 12:30 | **Join + set up.** Accept the GitHub invite, claim a role in section 3, get on your own seat (section 7), start the model | everyone | your name is in section 3 and your seat prints `READY` |
+| 12:00 – 14:00 | **Build.** R2 fixes the 1-D-tile wall (T5, now the top priority, see below) then level 4; R5 adds calibration + token counts; R4 starts the taxonomy from `results/`; R1 finishes fix A+B measurement | by role | each change merged *and* passes `python nkibench.py --selftest` |
+| 14:00 – 15:30 | **Measure.** Every change gets `--repeat 5`; R3 fills section 5. Keep a change only if the rate moved | R3 + owners | section 5 has a number for every change |
+| 15:30 – 16:30 | **Final run + freeze.** One `--all --repeat 5` run with everything merged; no code changes after it | R3 | final row in section 5, logs in `results/` |
+| last hour | **Write-up + demo.** `SUBMISSION.md`, taxonomy table, demo of a failure recovered by our feedback; rehearse once | R6 + R4 | all six deliverables in section 2 marked done |
+
+**Rule for everyone: whenever you change anything — code, a result, a task status — commit and push it
+straight away** (`git pull --rebase` first), so the other five always see the current state.
+
+**Top priority right now, from data:** after fix B, level 1 stopped reaching for matmul — the route
+message worked — and then hit the **same wall as level 3**: `SBUF and PSUM tensors must have at least 2
+dimensions` (4 of its 8 rounds in run 1). One better message for that error could move two levels. That is T5.
+
 ## 1. What we are doing, in one paragraph
 
 We build an **agent loop** around a small model (Qwen3-8B) running on our own AWS Trainium chip: the model
@@ -56,8 +75,8 @@ Status: `done` · `running` · `in progress` · `todo` · `blocked`. Add rows fr
 | T1 | Baseline run, all 4 levels, 1 run | Krish | done | solved 1/4; logs in `results/` |
 | T2 | **Fix A**: flag element-at-a-time HBM writes (level 2) | Krish | done | see section 6 |
 | T3 | **Fix B**: level-1 feedback names the route, not a list of names | Krish | done | see section 6 |
-| T4 | Measure fixes A + B, levels 1 and 2, `--repeat 5` | Krish | running | seat 7, started 11:27; logs `run-fixAB-L1.log`, `run-fixAB-L2.log` in the pod |
-| T5 | Level 3 wall: "SBUF and PSUM tensors must have at least 2 dimensions", then `IndexError` | R2 | todo | the organisers measured this wall as is identical every run, so a fix is cleanly attributable |
+| T4 | Measure fixes A + B, levels 1 and 2, `--repeat 5` | Krish | running | seat 7, started 11:27. Level 1 run 1/5: 0.30, but the failure **moved** — matmul gone, now the 1-D-tile wall (see section 0) |
+| T5 | **TOP PRIORITY.** 1-D-tile wall: "SBUF and PSUM tensors must have at least 2 dimensions" — blocks level 3 *and* (since fix B) level 1 | R2 | todo | the organisers measured this wall as identical every run, so a fix is cleanly attributable |
 | T6 | Level 4 wall: `dma_copy dst partition dimension 256 exceeds maximum 128` | R2 | todo | best 0.62 (passes 1 of 4 shapes) |
 | T7 | Calibration: agent prints a confidence per level and we check it against the truth | R5 | todo | "confidently wrong" is the worst behaviour in the rubric |
 | T8 | Token instrumentation per attempt | R5 | todo | prompt tokens are in the API response `usage` field |
@@ -74,7 +93,7 @@ test, not a result. Organisers' own 5-run baseline (from their [`STATE.md`](http
 
 | level | organisers' baseline (n=5) | our baseline today (n=1) | after fixes A+B (n=5) |
 |---|---|---|---|
-| 1 average pooling | 0/5, always 0.30 | 0.30, not solved | running |
+| 1 average pooling | 0/5, always 0.30 | 0.30, not solved | run 1: 0.30 (matmul gone, now 1-D-tile wall); runs 2–5 running |
 | 2 transpose | 4/5 solved | 1.00, solved on round 0 — **but the kernel wrote HBM one element at a time** (see fix A) | running |
 | 3 matmul, single tile | 0/5, always 0.30 | 0.30, not solved | — |
 | 4 matmul, tiled | 0/5, always 0.62 | 0.30, not solved (below their 0.62) | — |
