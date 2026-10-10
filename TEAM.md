@@ -148,6 +148,13 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - **It is slow:** the model writes ~500–700 tokens per design at ~7 tokens/s, so a round takes ~100 s and
   one seat needs ~2 h for one hard level. **More seats = faster results** — every teammate who starts
   their seat (SERVER.md) can run part of the experiment with `run_experiment.py --tag <you>`.
+- **Pilot on level 4 (seat 7, 3 runs, old loop): the model got stuck repeating itself.** With feedback C
+  it was told the exact wrong cycle every round and still sent back the identical design 6 rounds in a
+  row (2 distinct designs in 24 attempts). Fixes, the same for A, B and C: tell the model when it repeats
+  a design; give each of the 4 attempts a slightly different prompt; and feedback C now names values
+  (`light = YELLOW (2), expected GREEN (1)`). Pilot data kept separately; not mixed with the real runs.
+- **Main experiment running on 8 seats** (30, 31, 33, 230–234): levels 1–4 × feedback A/B/C, one run per
+  seat → 8 runs per setting.
 - **Never send `seed` to the model server** — it crashed seat 7's server (restarted, back up).
 
 ## Results (fill in from real runs only)

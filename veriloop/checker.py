@@ -348,12 +348,17 @@ class Grade:
     sim: SimResult
 
 
-def _show(value):
-    return "x (undefined)" if value is None else str(value)
+def _show(value, name=None, labels=None):
+    """A value as feedback C shows it. With LABELS in reference.py (e.g. light: 0 -> RED), the name of the
+    value is shown too -- "YELLOW (2)" says more to the model than "2"."""
+    if value is None:
+        return "x (undefined)"
+    label = (labels or {}).get(name, {}).get(value)
+    return f"{label} ({value})" if label else str(value)
 
 
-def _vals(d):
-    return " ".join(f"{k}={_show(v)}" for k, v in d.items())
+def _vals(d, labels=None):
+    return " ".join(f"{k}={_show(v, k, labels)}" for k, v in d.items())
 
 
 def score_of(sim):
@@ -371,6 +376,7 @@ def _first_wrong_c(ref, sim):
     read it off a waveform -- the inputs, the signal, what it gave, what was expected, and for a clocked
     design the cycles just before. A few examples at most, never the whole table."""
     unit = "cycle" if ref.CLOCKED else "test"
+    lab = getattr(ref, "LABELS", None)
     first = min(m["step"] for m in sim.mismatches)
     lines = []
     if ref.CLOCKED:
@@ -378,10 +384,10 @@ def _first_wrong_c(ref, sim):
             v, exp, got = sim.rows[i]
             wrong = [n for n in ref.OUTPUTS if got.get(n) != exp[n]]
             if not wrong:
-                lines.append(f"  {unit} {i}: inputs {_vals(v)} -> {_vals(got)} (correct)")
+                lines.append(f"  {unit} {i}: inputs {_vals(v, lab)} -> {_vals(got, lab)} (correct)")
             else:
-                outs = ", ".join(f"`{n}` = {_show(got.get(n))}, expected {exp[n]}" for n in wrong)
-                lines.append(f"  {unit} {i}: inputs {_vals(v)} -> {outs}   <-- first wrong {unit}")
+                outs = ", ".join(f"`{n}` = {_show(got.get(n), n, lab)}, expected {_show(exp[n], n, lab)}" for n in wrong)
+                lines.append(f"  {unit} {i}: inputs {_vals(v, lab)} -> {outs}   <-- first wrong {unit}")
     else:
         # One example per wrong signal first (so no broken output goes unmentioned), then more rows.
         firsts = {}
@@ -391,7 +397,8 @@ def _first_wrong_c(ref, sim):
         picks += [m for m in sim.mismatches if m not in picks]
         for m in picks[:MAX_EXAMPLES]:
             v, exp, _ = sim.rows[m["step"]]
-            lines.append(f"  inputs {_vals(v)} -> `{m['signal']}` = {_show(m['got'])}, expected {exp[m['signal']]}")
+            lines.append(f"  inputs {_vals(v, lab)} -> `{m['signal']}` = {_show(m['got'], m['signal'], lab)}, "
+                         f"expected {_show(exp[m['signal']], m['signal'], lab)}")
     undefined = any(m["got"] is None for m in sim.mismatches)
     note = ("\nAn output is x (undefined): it is never given a value on some path -- check that every "
             "output is assigned, and that reset sets every register." if undefined else "")

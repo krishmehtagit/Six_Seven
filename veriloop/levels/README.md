@@ -17,6 +17,7 @@ MODULE  = "counter8"                     # must match spec.txt and good.v
 INPUTS  = {"reset": 1, "en": 1}          # name -> bit width. Do NOT list clk.
 OUTPUTS = {"count": 8}                   # name -> bit width
 CLOCKED = True                           # True: the test bench drives clk. False: combinational.
+LABELS  = {"state": {0: "IDLE", 1: "RUN"}}   # optional: names for output values, used in feedback C
 
 def vectors():
     """The test inputs: a list of dicts, one per step (one per clock cycle if CLOCKED).

@@ -50,11 +50,25 @@ def first_prompt(spec):
     return f"Write a Verilog module for this specification.\n\n{spec.strip()}\n\n{FORMAT}"
 
 
-def repair_prompt(spec, design, feedback):
+REPEAT_NOTE = ("This is the same design you sent before, and it fails in the same way. Repeating it will not "
+               "help: rethink the logic and try a different approach.")
+
+
+def repair_prompt(spec, design, feedback, repeated=False):
+    # The repeat note is the same for feedback A, B and C: it says nothing about WHAT is wrong, only that
+    # the model is going in circles (measured in the pilot: 6 rounds of the identical design).
     return (f"Specification:\n{spec.strip()}\n\n"
             f"Your previous design:\n```verilog\n{design.strip()}\n```\n\n"
             f"A checker tested it:\n{feedback.strip()}\n\n"
-            f"Fix the design. {FORMAT}")
+            + (f"{REPEAT_NOTE}\n\n" if repeated else "")
+            + f"Fix the design. {FORMAT}")
+
+
+def variant(prompt, i):
+    """A different last line per attempt in a round. Measured in the pilot: with identical prompts the 4
+    attempts were usually byte-identical, so 4 attempts bought 1. A different suffix starts each attempt
+    down a different path; it carries no information about the answer."""
+    return prompt if i == 0 else f"{prompt}\n(Attempt {i + 1}.)"
 
 
 _FENCE = re.compile(r"```[ \t]*(?:verilog|systemverilog|sv|v)?[ \t]*\n(.*?)```", re.S | re.I)
@@ -134,15 +148,16 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
 
     say(f"=== {level}   feedback {feedback}   {rounds} rounds x {samples} attempts   run {run_id}")
     prev_design, prev_feedback, best = None, None, None
-    seen = set()
+    seen, sent, prev_repeated = set(), set(), False
     totals = dict(attempts=0, prompt_tokens=0, completion_tokens=0, seconds=0.0)
     for rnd in range(rounds):
-        prompt = first_prompt(spec) if prev_design is None else repair_prompt(spec, prev_design, prev_feedback)
+        prompt = (first_prompt(spec) if prev_design is None
+                  else repair_prompt(spec, prev_design, prev_feedback, repeated=prev_repeated))
         if offline:
             replies = offline_replies(level_dir, samples, rnd)
         else:
             with cf.ThreadPoolExecutor(max_workers=samples) as ex:   # the server runs 4 sequences at once
-                replies = list(ex.map(lambda _: ask(prompt, base_url, model), range(samples)))
+                replies = list(ex.map(lambda i: ask(variant(prompt, i), base_url, model), range(samples)))
 
         graded = []
         totals["seconds"] += max(r[1]["seconds"] for r in replies)   # attempts in a round run in parallel
@@ -168,7 +183,8 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
                 log.flush()
 
         scores = [g[0] for g in graded]
-        round_best = max(graded, key=lambda g: g[0])          # first among equals
+        # Best score; among equals prefer a design not already sent back, so the loop can leave a rut.
+        round_best = max(graded, key=lambda g: (g[0], g[2] not in sent))
         if best is None or round_best[0] > best[0]:
             best = round_best
         say(f"round {rnd}: scores {[round(s, 2) for s in scores]}  best so far {best[0]:.2f}  "
@@ -179,6 +195,8 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
         # Repair from this round's best, not the all-time best: a single bad round must not freeze the loop
         # (the organisers' kernel agent measured exactly that failure).
         prev_design, prev_feedback = round_best[2] or (prev_design or ""), round_best[3]
+        prev_repeated = prev_design in sent
+        sent.add(prev_design)
         say("  feedback sent: " + prev_feedback.replace("\n", "\n                 ")[:600])
     else:
         rnd = rounds - 1

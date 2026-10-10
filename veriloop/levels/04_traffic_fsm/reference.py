@@ -10,6 +10,8 @@ MODULE = "traffic_light"
 INPUTS = {"reset": 1, "ped": 1}
 OUTPUTS = {"light": 2, "walk": 1}
 CLOCKED = True
+# Optional: names for output values, shown in feedback C ("YELLOW (2)" rather than "2").
+LABELS = {"light": {0: "RED", 1: "GREEN", 2: "YELLOW"}}
 
 RED, GREEN, YELLOW = 0, 1, 2
 CYCLES = {RED: 3, GREEN: 4, YELLOW: 2}
