@@ -44,6 +44,7 @@ the hardware provided and be approved by an Annapurna engineer.
 | file | what it is | who maintains it |
 |---|---|---|
 | `TEAM.md` | the plan, phase by phase, and the requirements checklist — the single source of truth | everyone |
+| `TASKS.md` | the task board: every task, the exact files it owns, dependencies, and who is doing it | everyone (own row only) |
 | `IDEAS.md` | candidate project ideas in one short format, each credited to its author | everyone |
 | `idea1.md` | Dhritii07's original full write-up of idea 1 (ShapeGuard) | Dhritii07 |
 | `README.md` | short intro, points here and to TEAM.md | everyone |

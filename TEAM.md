@@ -99,6 +99,8 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - [ ] Not approved → fall back to the kernel-agent work on branch `kernel-agent-backup`
 
 ### 3. Build the checker first (~1 hour) — ▶️ NOW
+
+**👉 Specific tasks, file paths and who-is-doing-what are in [`TASKS.md`](TASKS.md). Pick one there.**
 - [ ] Install `iverilog` on each seat that runs experiments (`apt-get install -y iverilog`)
 - [ ] For levels 1–3: the spec (3–5 lines each), a Python reference model, and a test bench that
       tries every input (combinational) or a test sequence with edge cases (clocked: reset, enable off,
