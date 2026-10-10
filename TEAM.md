@@ -69,7 +69,7 @@ your name and pushing.
 
 | role | what you own | coding? | name |
 |---|---|---|---|
-| R1 Lead + checker | fixes A and B, the A+B measurement, helps R2 on T5, keeps this file current | yes | Krish |
+| R1 Lead | coordinates the team, keeps this file current, chases the deadline | no | |
 | R2 T5 owner | the 1-D-tile feedback message (`agent.py`, `enrich`) | yes | |
 | R3 Measurement | `--repeat 5` runs on your own seat, the results table, the final run | a little | |
 | R4 Taxonomy | read failed kernels in `results/*.jsonl`, name the modes, count them | **no** | |
