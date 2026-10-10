@@ -4,7 +4,7 @@
 where every task stands, and how to submit. Update it whenever you finish or start something — commit
 and push straight away, so the other five see it.
 
-Upstream (the organisers' repo, read-only for us): https://github.com/yahavb/trainium-agent-labs
+Upstream (the organisers' repo, read-only for us): https://github.com/yahavb/trainium-agent-labs — setup scripts, the other sample project and the gpt-oss docs live there; we only copied the kernel agent.
 
 ---
 
@@ -18,11 +18,11 @@ taxonomy and an agent that knows when it failed.
 
 ## 2. What we hand in (the judged deliverables)
 
-From the README, Part 4, and `projects/02-kernel-agent/CHALLENGE-kernel-agent.md`:
+From the [organisers' README, Part 4](https://github.com/yahavb/trainium-agent-labs#part-4--the-challenge), and [`kernel-agent/ORGANISERS-CHALLENGE.md`](kernel-agent/ORGANISERS-CHALLENGE.md):
 
 | # | deliverable | where it lives | owner | status |
 |---|---|---|---|---|
-| D1 | **The checker** + reasoning for what it accepts/rejects | `projects/02-kernel-agent/nkibench.py`, `agent.py` (`grade`), section 6 below | | in progress |
+| D1 | **The checker** + reasoning for what it accepts/rejects | `kernel-agent/nkibench.py`, `kernel-agent/agent.py` (`grade`), section 6 below | | in progress |
 | D2 | **Attempt log** — every attempt with its score | `results/*.jsonl` + `results/*.log` | | baseline in |
 | D3 | **One-page note** — what we ran, on what, how many runs, the spread | `SUBMISSION.md` (to write) | | todo |
 | D4 | **Failure taxonomy** — every wrong kernel, grouped into named modes, with counts | `results/TAXONOMY.md` (to write) | | todo |
@@ -57,7 +57,7 @@ Status: `done` · `running` · `in progress` · `todo` · `blocked`. Add rows fr
 | T2 | **Fix A**: flag element-at-a-time HBM writes (level 2) | Krish | done | see section 6 |
 | T3 | **Fix B**: level-1 feedback names the route, not a list of names | Krish | done | see section 6 |
 | T4 | Measure fixes A + B, levels 1 and 2, `--repeat 5` | Krish | running | seat 7, started 11:27; logs `run-fixAB-L1.log`, `run-fixAB-L2.log` in the pod |
-| T5 | Level 3 wall: "SBUF and PSUM tensors must have at least 2 dimensions", then `IndexError` | R2 | todo | the README says this wall is identical every run, so a fix is cleanly attributable |
+| T5 | Level 3 wall: "SBUF and PSUM tensors must have at least 2 dimensions", then `IndexError` | R2 | todo | the organisers measured this wall as is identical every run, so a fix is cleanly attributable |
 | T6 | Level 4 wall: `dma_copy dst partition dimension 256 exceeds maximum 128` | R2 | todo | best 0.62 (passes 1 of 4 shapes) |
 | T7 | Calibration: agent prints a confidence per level and we check it against the truth | R5 | todo | "confidently wrong" is the worst behaviour in the rubric |
 | T8 | Token instrumentation per attempt | R5 | todo | prompt tokens are in the API response `usage` field |
@@ -70,7 +70,7 @@ Status: `done` · `running` · `in progress` · `todo` · `blocked`. Add rows fr
 ## 5. Results — rates, not single runs
 
 Model Qwen3-8B on one Trainium chip, `--rounds 8 --samples 4 --context 8192`. A row with n=1 is a smoke
-test, not a result. Organisers' own 5-run baseline (from `STATE.md`) is the comparison point.
+test, not a result. Organisers' own 5-run baseline (from their [`STATE.md`](https://github.com/yahavb/trainium-agent-labs/blob/master/STATE.md)) is the comparison point.
 
 | level | organisers' baseline (n=5) | our baseline today (n=1) | after fixes A+B (n=5) |
 |---|---|---|---|
@@ -101,7 +101,7 @@ half credit) and the message names the change: build the result in SBUF, then on
 levels it is a note only — the repo's rule is that rejecting a correct kernel is worse than missing one.
 Selftest: catches the real kernel above; does not flag any of the four reference kernels. Verified on the
 Neuron simulator: reference level 2 → 1.0, the element-wise kernel → 0.75. The organisers listed this gap
-themselves (`STATE.md`, "Next", item 5).
+themselves ([`STATE.md`](https://github.com/yahavb/trainium-agent-labs/blob/master/STATE.md), "Next", item 5).
 
 **Fix B — `agent.INTENT_CALLS` and `agent.OFF_ROUTE` (level 1).** Baseline level 1 went: matmul into the
 wrong buffer → invented `nc_matmul(transpose_moving=)` → invented `nisa.multiply` → invented
@@ -116,7 +116,7 @@ the simulator: reference level 1 still → 1.0.
 
 ## 7. How to work — read before your first change
 
-**Get on your own seat** (each person, once — full detail in `README.md` Part 1):
+**Get on your own seat** (each person, once — full detail in the [organisers' README, Part 1](https://github.com/yahavb/trainium-agent-labs#part-1--get-onto-your-chip)):
 ```bash
 brew install awscli kubectl                      # once
 # paste the macOS/Linux credentials block from the workshop channel into THIS terminal
@@ -130,9 +130,9 @@ kubectl exec -it seat-<N> -- bash                # wait for root@seat-<N>:/works
 the pod is replaced. So the code lives here, in this repo:
 ```bash
 git clone https://github.com/krishmehtagit/Six_Seven.git && cd Six_Seven
-# edit projects/02-kernel-agent/*.py, then copy into your seat:
-kubectl cp projects/02-kernel-agent/nkibench.py seat-<N>:/workspace/projects/02-kernel-agent/nkibench.py -c app
-kubectl cp projects/02-kernel-agent/agent.py    seat-<N>:/workspace/projects/02-kernel-agent/agent.py    -c app
+# edit kernel-agent/*.py, then copy into your seat (the pod keeps its own path):
+kubectl cp kernel-agent/nkibench.py seat-<N>:/workspace/projects/02-kernel-agent/nkibench.py -c app
+kubectl cp kernel-agent/agent.py    seat-<N>:/workspace/projects/02-kernel-agent/agent.py    -c app
 ```
 
 **Always prove the checker before trusting a score**, inside the seat:
