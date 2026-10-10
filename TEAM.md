@@ -17,6 +17,24 @@ The experiment: same levels, **three feedback levels**, 5 runs each →
 **A** pass/fail only · **B** "12 of 16 inputs wrong" · **C** "cycle 7: `count` went 9 → 0, should be 9 → 10".
 The result is one table and one graph: **solve rate vs. feedback quality**.
 
+### Who does what — in one round
+
+| who | writes | what it does |
+|---|---|---|
+| **We (the team)** | **Python**: the checker and the loop | sets the task, tests the model's design, writes the feedback, logs everything |
+| **The model** (Qwen3-8B on our Trainium chip) | **Verilog**: the hardware design | reads the task, designs the circuit, fixes it when told what is wrong |
+| **The simulator** (`iverilog`, a ready-made tool) | — | runs the Verilog like a real circuit |
+
+1. **Input to the model:** a short spec we write — e.g. *"8-bit counter: counts up by 1 each clock when
+   `en` = 1; goes to 0 when `reset` = 1."* (from round 2 on, plus the checker's feedback)
+2. **Output of the model:** a Verilog module (~10 lines).
+3. **Our checker** simulates it, compares with the correct behaviour (a Python reference), and outputs a
+   **score** (e.g. 0.6) and **feedback** (e.g. "cycle 7: `count` went 9 → 0, should be 9 → 10").
+4. The feedback goes back to the model; repeat up to 8 rounds.
+
+**What we get at the end:** the attempt log (every design, score and feedback), the results table and
+graph (solve rate vs. feedback quality), and the demo case.
+
 ## Plan — phase by phase
 
 Times are a guide; fix them once we know the deadlines. Tick items as they are done, and push.
