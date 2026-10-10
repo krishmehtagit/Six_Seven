@@ -1,13 +1,52 @@
-# Six_Seven — Hack the Chip (NYU × Annapurna Labs)
+# VeriLoop — a small model on Trainium designs chip hardware, a simulator grades it
 
-Team repo. **Start with [`TEAM.md`](TEAM.md)**, then pick a task in [`TASKS.md`](TASKS.md). Using an AI assistant? Point it at [`AGENTS.md`](AGENTS.md).
+**Team Six_Seven** · Hack the Chip, NYU × Annapurna Labs, 2026-10-10
 
-Our project: **VeriLoop** — a small model on Trainium designs digital hardware in Verilog, a simulator
-checks every design, and we measure how feedback quality changes the success rate. See
-[`TEAM.md`](TEAM.md) for the plan and [`IDEAS.md`](IDEAS.md) (Idea 6) for the full idea.
+Qwen3-8B, running on an AWS Trainium chip, writes digital hardware in Verilog. A simulator checks every
+design against a reference on every test and sends feedback back; the model tries again. We measured
+whether the **quality of that feedback** — A: only *pass/fail*, B: *how many tests fail*, C: *where it first
+goes wrong* — decides whether the loop succeeds.
 
-The organisers' repo, with cluster setup and the two sample projects:
+![Solve rate and best score per level and feedback level](results/graph.png)
+
+## The result in four lines
+
+- **Easy blocks need no feedback:** mux, adder and counter were solved on the first try in all 72 runs.
+- **Feedback did not turn hard failures into solves:** the traffic-light state machine and the FIFO were never
+  solved, with any feedback; C scored slightly higher on the traffic light (0.69 vs 0.65, n = 8 each). The
+  MAC cell was fixed on round 2 with A, B and C alike.
+- **The model's mistakes are systematic** — one wrong idea, repeated (`results/TAXONOMY.md`).
+- **The model does not know when it is wrong** — designs it rated 80–100% confident were right only half the
+  time, so only the checker may declare success (`results/calibration.txt`).
+
+Full one-page note: **[`SUBMISSION.md`](SUBMISSION.md)** · the checker: **[`CHECKER.md`](CHECKER.md)** ·
+demo script: [`DEMO.md`](DEMO.md)
+
+## What is where
+
+| path | what |
+|---|---|
+| [`SUBMISSION.md`](SUBMISSION.md) | the one-page note: what we ran, on what, how many runs, the spread, findings |
+| [`CHECKER.md`](CHECKER.md) | what the checker accepts and rejects, and how we proved it |
+| [`veriloop/`](veriloop/) | the code: `checker.py`, `agent.py`, `run_experiment.py`, `selftest.py`, `calibrate.py`, `taxonomy.py`, `plot.py` |
+| [`veriloop/levels/`](veriloop/levels/) | the six hardware levels: spec, Python reference, a correct design, 3–5 broken designs each |
+| [`results/`](results/) | every run and every attempt; what is counted and what is excluded is in `results/README.md` |
+| [`DEMO.md`](DEMO.md) | the 2-minute demo |
+| `TEAM.md`, `TASKS.md`, `IDEAS.md`, `SERVER.md`, `AGENTS.md` | how the team worked: plan, task board, ideas, seat access, notes for AI assistants |
+
+## Reproduce
+
+```bash
+python veriloop/selftest.py                    # proves every level: good design passes, broken ones are caught
+python veriloop/tests/test_compile.py          # checker tests (also test_simulate.py, test_feedback.py)
+python veriloop/run_experiment.py --tag me --levels veriloop/levels/04_traffic_fsm --runs 1
+python veriloop/plot.py                        # table + graph from results/
+```
+Running the model needs a Trainium seat with the model served (`SERVER.md`); the checker only needs Icarus
+Verilog (`brew install icarus-verilog` or `apt-get install iverilog`).
+
+## Team
+
+Krish Mehta, Dhriti Vaidya, Smruthi, Manish Reddy, Anki, Bhagavan Madala — and **Claude** (Anthropic's AI
+assistant, via Claude Code) as an AI teammate. Built on the organisers' repo,
 [yahavb/trainium-agent-labs](https://github.com/yahavb/trainium-agent-labs).
-
-**Team:** Krish Mehta, Dhriti Vaidya, Smruthi, Manish Reddy, Anki, Bhagavan Madala — and **Claude**
-(Anthropic's AI assistant, via Claude Code) as an AI teammate.
