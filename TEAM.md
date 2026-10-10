@@ -129,7 +129,7 @@ kubectl exec -it seat-<N> -- bash                # wait for root@seat-<N>:/works
 **Edit on your laptop, run on your seat.** The pod's `/workspace` is the organisers' code and is lost if
 the pod is replaced. So the code lives here, in this repo:
 ```bash
-git clone <this repo> && cd trainium-agent-labs
+git clone https://github.com/krishmehtagit/Six_Seven.git && cd Six_Seven
 # edit projects/02-kernel-agent/*.py, then copy into your seat:
 kubectl cp projects/02-kernel-agent/nkibench.py seat-<N>:/workspace/projects/02-kernel-agent/nkibench.py -c app
 kubectl cp projects/02-kernel-agent/agent.py    seat-<N>:/workspace/projects/02-kernel-agent/agent.py    -c app
