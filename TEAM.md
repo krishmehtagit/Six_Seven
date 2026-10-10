@@ -134,24 +134,12 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - [ ] Demo rehearsed once (2 minutes: the failure → the feedback → the fix → the graph)
 - [ ] Final check of the requirements list below, then submit
 
-## ▶️ RESUME HERE (written 2:25 pm, before a break until ~3:10 pm)
+## ✅ Final status (4:10 pm)
 
-**Running on the seats by themselves — no laptop needed:**
-- Level 4 (traffic light) on seats 30, 31, 33, 230–234, feedback A/B/C, 1 run each → done ~2:40 pm.
-- Then automatically: **level 5** (MAC) on 30, 31, 33 and **level 6** (FIFO) on 230, 231, 232 → done ~3:20 pm.
-- Seats 233 and 234 shut their model down after level 4. Seat 7 is cleaned and handed back.
-- **Update 2:45 pm:** level 4 done (0/8 solved for A, B and C; mean best score 0.65 / 0.65 / 0.69). Level 5
-  done (9/9 solved, all on round 2). Level 6 running on 230–232. **Level 4 with 12 rounds** now running on
-  30, 31, 33 (each seat starts with a different feedback level; ~25 min per run, 3 runs per seat). Recorded
-  as its own setting (`max_rounds` column), never mixed with the 6-round runs.
-
-**When we're back, in order:**
-1. Check: `bash veriloop/collect.sh 30 31 33 230 231 232 233 234` (credentials pasted first), then
-   `python veriloop/plot.py` → `results/table.md` + `results/graph.png`.
-2. `python veriloop/taxonomy.py` → `results/TAXONOMY.md`.
-3. Calibration on the seats once runs are done: `python calibrate.py results/*_attempts.jsonl --max 60`.
-4. Fill the ⏳ numbers in `SUBMISSION.md` and pick the demo case for `DEMO.md`.
-5. Still open for a human: **submission deadline and how to submit.**
+All experiments are finished and the models on our seats are stopped. Results, graph, taxonomy and
+calibration are in `results/`; the write-up is in `SUBMISSION.md`, `CHECKER.md`, `DEMO.md` and `README.md`.
+The submission is prepared as a pull request to the organisers' repo (folder `projects/six-seven-veriloop/`),
+to be opened once the submission route is confirmed.
 
 ## Findings so far (real runs, seat 7)
 

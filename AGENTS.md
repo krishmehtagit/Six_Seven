@@ -31,14 +31,11 @@ the hardware provided and be approved by an Annapurna engineer.
 
 ## Where we are right now
 
-- **Project chosen: VeriLoop** (Idea 6 in [`IDEAS.md`](IDEAS.md)) — the model writes Verilog for
-  hardware blocks, a simulator checks it, and we measure solve rate vs. feedback quality. Status:
-  **approved by an Annapurna engineer**; now building the checker (phase 3). The plan, phase by phase, is in [`TEAM.md`](TEAM.md).
-  Nothing has been submitted.
-- Earlier work on the organisers' kernel-agent challenge is on the branch
-  [`kernel-agent-backup`](https://github.com/krishmehtagit/Six_Seven/tree/kernel-agent-backup) as a
-  fallback (three checker improvements, a baseline run, and results).
-- Deadlines (proposal and submission) are not known yet — check TEAM.md.
+- **Project: VeriLoop** — finished. All runs done (129 counted runs), results and write-up final:
+  `SUBMISSION.md` (one-page note), `CHECKER.md`, `DEMO.md`, `results/`.
+- Submission: a pull request to the organisers' repo adding `projects/six-seven-veriloop/`; prepared, not yet
+  opened. Do not open it without Krish's explicit OK.
+- Earlier kernel-agent work is on branch `kernel-agent-backup`.
 
 ## Repo layout
 
