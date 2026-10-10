@@ -3,7 +3,7 @@
 **Team:** Six_Seven (registered as The Token Wasters), with **Claude** (Anthropic, via Claude Code) as an AI teammate · **Event:** Hack the Chip, NYU × Annapurna Labs, 2026-10-10
 **Code, data and every attempt:** this repo · checker write-up: [`CHECKER.md`](CHECKER.md)
 
-> **DRAFT — the 12-round level-4 row and calibration (⏳) are filled in when those runs finish (~4:45 pm).**
+> **DRAFT — only the 12-round level-4 row (⏳) is still to fill, when those runs finish (~4:45 pm).**
 
 ## The question
 
@@ -61,7 +61,11 @@ Each cell: solved / runs, mean best score (min–max). Graph: `results/graph.png
 5. **"8 runs" can secretly be 2.** The model is nearly deterministic for code: separate runs on separate
    chips produced byte-identical designs. We fingerprinted every design to check our runs are independent,
    fixed it, and report only runs made after the fix.
-6. ⏳ calibration: does the model know when its design is wrong? (`calibrate.py`)
+6. **The model does not know when it is wrong — so the checker, not the model, must decide.** Asked for its
+   confidence on 80 of its own designs (fresh chat, verdict hidden): 91.5 on average for the 13 correct
+   ones, 60.1 for the 67 wrong ones — it senses something — but **16% of wrong designs got ≥ 80**, designs
+   it rated 80–100 were right only **52%** of the time, and its Brier score (0.334) is worse than always
+   answering 50 (0.25). (`results/calibration.txt`, `results/calibration.csv`)
 
 ## Honesty notes
 

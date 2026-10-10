@@ -45,7 +45,8 @@ wrong. The hard levels are where we hoped C would matter."*
 - The model **goes in circles** without being told it repeated itself — identical design 6 rounds running.
 - "8 runs" can be **2 runs**: the model is nearly deterministic, so we fingerprinted every design to prove
   our runs are independent.
-- The model's own confidence vs the checker ⏳ (calibration).
+- The model **does not know when it is wrong**: designs it rated 80–100% confident were right only 52%
+  of the time; 16% of its wrong designs got ≥ 80. That is why only the checker may say "solved".
 
 ## 1:50 — close
 
