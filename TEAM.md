@@ -7,6 +7,36 @@ Whenever anything changes, commit and push straight away (`git pull --rebase` fi
 
 **To be decided by the team.** Write it here in 2–3 lines once agreed.
 
+## Plan — phase by phase
+
+Times are rough until we know the deadlines. Tick a phase when it is done.
+
+**1. Planning (now)**
+- [ ] Everyone pitches ideas; pick **one**
+- [ ] Check it fits: runs on our chip, uses the model, and has a **checker** — a cheap, exact way to
+      say if an attempt is right and *why* it is wrong
+- [ ] Write the idea in 2–3 lines under "Our idea" above
+
+**2. Approval**
+- [ ] Pitch it to an Annapurna engineer and get a yes (before the proposal deadline)
+- [ ] Ask for the submission deadline; write both times below
+
+**3. Build**
+- [ ] The **checker** first, tested on known-good and known-bad answers *before* the model is involved
+- [ ] One model attempt end to end
+- [ ] The loop: attempt → checker → feedback → retry, logging every attempt with its score
+
+**4. Measure**
+- [ ] Run it several times (not once) and record the success rate and spread
+- [ ] Improve the checker's feedback where the model gets stuck; re-measure; keep only what helps
+
+**5. Write-up and demo**
+- [ ] One-page note: what we ran, on what, how many runs, the spread
+- [ ] Demo: one case where the model failed, the feedback said why, and it recovered
+
+**6. Submit**
+- [ ] Final check of the requirements list, then submit
+
 ## What the organisers require for our own project
 
 - [ ] **It runs on the hardware they gave us** (our seats: one Trainium chip each, with the Qwen3-8B model)
