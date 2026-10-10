@@ -1,37 +1,39 @@
 # Team Six_Seven — Hack the Chip (NYU × Annapurna Labs), 2026-10-10
 
-**Start here.** This file is the single source of truth for the team: the goal, the plan, who owns what,
-where every task stands, and how to submit. Update it whenever you finish or start something — commit
-and push straight away, so the other five see it.
+**Start here.** This file is the single source of truth for the team: the goal, the checklist,
+where everything stands, and how to submit. Update it whenever you finish or start something — commit
+and push straight away, so everyone sees it.
 
 Upstream (the organisers' repo, read-only for us): https://github.com/yahavb/trainium-agent-labs — setup scripts, the other sample project and the gpt-oss docs live there; we only copied the kernel agent.
 
 ---
 
-## 0. Plan — only what is scored
+## 0. Checklist — what is done and what is left
 
-We do **five things and nothing else**. Everything that does not feed the grade is cut (list at the bottom).
+No roles: anyone picks the next open item, says so in the team chat, and ticks it here when done.
+Only work that is scored is on this list.
 
-| # | task | why it matters | owner | when |
-|---|---|---|---|---|
-| 1 | **T5 — fix the 1-D-tile wall** (`SBUF and PSUM tensors must have at least 2 dimensions`) | one message blocks **two** levels (1 and 3) → *levels cleared* 25% + *correctness* 30% | R2 | now → 13:30 |
-| 2 | **T7 — calibration**: the agent states a confidence per level and says "I could not verify" when it failed | *method & honesty* 25% — "confidently wrong is the worst behaviour" | R5 | now → 14:00 |
-| 3 | **T9 — failure taxonomy**: group every wrong kernel in `results/*.jsonl` into named modes, with counts | *method & honesty*; the organisers call it "the artifact we would most want to keep". **No coding** | R4 | now → 15:30 |
-| 4 | **T4 — measure every change with `--repeat 5`**, keep it only if the rate moved; one final full run | *delivered result*; the one-pager must report rates and spread | R3 (+ R1) | ongoing; final run ~15:30 |
-| 5 | **T11/T12 — one-page note + demo** of a failure our feedback fixed | **required** + *demo & write-up* 20% | R6 | last hour |
+**Required — no valid submission without these**
+- [x] **The checker**, improved: fixes A, B and C (section 4)
+- [x] **Attempt log**: recorded automatically into `results/`
+- [ ] **One-page note** (`SUBMISSION.md`): what we ran, how many runs, the spread — last hour
 
-**Rule for everyone: whenever you change anything — code, a result, a task status — commit and push it
-straight away** (`git pull --rebase` first), so the other five always see the current state.
+**Scored extras**
+- [ ] **Measure** fixes A+B (running on seat 7) and fix C with `--repeat 5`; keep a fix only if the rate moved
+- [ ] **Failure list (taxonomy)**: group the model's mistakes in `results/*.jsonl` into types, with counts — no coding
+- [ ] **Calibration**: the agent says how sure it is, and says "I could not verify" when it failed
+- [ ] **Demo**: one case where the model failed, our message said why, and it fixed it
+- [ ] **Final run** of all 4 levels with everything in, then freeze the code
+- [ ] **Submit** — deadline: ask organisers, write it here: **__:__**
 
-**Why T5 is first, from data:** after fix B, level 1 stopped reaching for matmul — the route message
-worked — and then hit the **same wall as level 3** (4 of its 8 rounds in run 1). One better message for
-that error could move two levels.
+**Done so far:** seat 7 set up and serving · baseline run (solved 1/4) · fix A (level 2) · fix B
+(level 1) · fix C (the 1-D-tile error, levels 1 and 3) · team repo.
 
-**Fix C (T5) — `agent.failing_line` + `agent.one_d_cause`.** Every simulator error now says which kernel line raised it. For the 1-D-tile error the line is diagnosed: a reduction over axis 0 is told axis 0 is the partition axis and must never be reduced; a sliced shape like `x.shape[1:]` is told it is a one-element tuple. Traced on all 39 attempts that hit this wall.
+**Cut — not worth the time:** level 4 tiling, the gpt-oss comparison, adding new operations (softmax
+etc.), on-device timing.
 
-**Cut — do not spend time on these:** level 4 tiling (T6), the gpt-oss comparison (T10), adding new
-operations (softmax etc.), on-device timing. Token instrumentation is folded into T7 as a one-line extra
-(the API response already has `usage`), only if it is quick.
+**Rule: whenever anything changes — code, a result, a tick on this list — commit and push it straight
+away** (`git pull --rebase` first), so everyone always sees the current state.
 
 ## 1. What we are doing, in one paragraph
 
@@ -47,56 +49,22 @@ taxonomy and an agent that knows when it failed.
 
 | # | deliverable | where it lives | status |
 |---|---|---|---|
-| D1 | **The checker** + reasoning for what it accepts/rejects | `kernel-agent/nkibench.py`, `kernel-agent/agent.py` (`grade`), section 6 below | fixes A + B written up; T5 to add |
+| D1 | **The checker** + reasoning for what it accepts/rejects | `kernel-agent/nkibench.py`, `kernel-agent/agent.py` (`grade`), section 4 below | fixes A, B, C written up |
 | D2 | **Attempt log** — every attempt with its score | `results/*.jsonl` + `results/*.log` | baseline in; A+B measurement running |
-| D3 | **One-page note** — what we ran, on what, how many runs, the spread | `SUBMISSION.md` | todo (R6, last hour) |
+| D3 | **One-page note** — what we ran, on what, how many runs, the spread | `SUBMISSION.md` | todo |
 
 **Scored extras** we are doing ([`ORGANISERS-CHALLENGE.md`](kernel-agent/ORGANISERS-CHALLENGE.md)):
 
 | # | deliverable | where it lives | status |
 |---|---|---|---|
-| D4 | **Failure taxonomy** — wrong kernels grouped into named modes, with counts | `results/TAXONOMY.md` | todo (R4) |
-| D5 | **Calibration** — agent's stated confidence vs. the truth | `kernel-agent/agent.py` + a table in section 5 | todo (R5) |
-| D6 | **Demo** — a failure *and the recovery*, not just a success | `SUBMISSION.md` | todo (R6) |
+| D4 | **Failure taxonomy** — wrong kernels grouped into named modes, with counts | `results/TAXONOMY.md` | todo |
+| D5 | **Calibration** — agent's stated confidence vs. the truth | `kernel-agent/agent.py` + a table in section 3 | todo |
+| D6 | **Demo** — a failure *and the recovery*, not just a success | `SUBMISSION.md` | todo |
 
 How it is scored: **30%** correctness on held-back shapes · **25%** levels cleared and attempts needed ·
 **25%** method & honesty (does the agent know when it failed? taxonomy) · **20%** demo & write-up.
 
-## 3. Roles — put your name in
-
-Team on GitHub: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax, + 1 to come. Claim a row by writing
-your name and pushing.
-
-| role | what you own | coding? | name |
-|---|---|---|---|
-| R1 Lead | coordinates the team, keeps this file current, chases the deadline | no | |
-| R2 T5 owner | the 1-D-tile feedback message (`agent.py`, `enrich`) | yes | |
-| R3 Measurement | `--repeat 5` runs on your own seat, the results table, the final run | a little | |
-| R4 Taxonomy | read failed kernels in `results/*.jsonl`, name the modes, count them | **no** | |
-| R5 Calibration | confidence per level, checked against the real score | yes | |
-| R6 Write-up + demo | `SUBMISSION.md`, the demo, chases everyone for numbers | **no** | |
-
-Everyone has their own seat (pod) and chip — run experiments on your own seat, not someone else's.
-
-## 4. Task board
-
-Status: `done` · `running` · `in progress` · `todo` · `blocked`. Only scored work is on here.
-
-| ID | task | owner | status | notes |
-|---|---|---|---|---|
-| T0 | Seat 7 set up, Qwen3-8B serving | Krish | done | ready in ~3 min, context 8192 |
-| T1 | Baseline run, all 4 levels, 1 run | Krish | done | solved 1/4; logs in `results/` |
-| T2 | **Fix A**: flag element-at-a-time HBM writes (level 2) | Krish | done | see section 6 |
-| T3 | **Fix B**: level-1 feedback names the route, not a list of names | Krish | done | see section 6 |
-| T4 | Measure fixes A + B, levels 1 and 2, `--repeat 5` | Krish | running | seat 7, started 11:27. Level 1 run 1/5: 0.30, but the failure **moved** — matmul gone, now the 1-D-tile wall |
-| T5 | 1-D-tile wall — blocks level 3 *and* (since fix B) level 1 | Krish | done, to measure | 39 failures traced: 36 = `nl.sum(..., axis=[0, 1])` (reducing the partition axis), 3 = `shape=x.shape[1:]`. New message names the line and the cause; every error now carries its line. References still 1.0. Measure after T4 finishes |
-| T7 | Calibration (+ token counts if quick) | R5 | todo | |
-| T9 | Failure taxonomy over all `results/*.jsonl` | R4 | todo | start now with the baseline log (76 attempts) |
-| T11 | `SUBMISSION.md` one-pager + checker rationale | R6 | todo | |
-| T12 | Demo: a level where an early round fails and a later round recovers *because of our message* | R6 | todo | |
-| T13 | Final submission package | R6 | todo | deadline: ask organisers, write it here: **__:__** |
-
-## 5. Results — rates, not single runs
+## 3. Results — rates, not single runs
 
 Model Qwen3-8B on one Trainium chip, `--rounds 8 --samples 4 --context 8192`. A row with n=1 is a smoke
 test, not a result. Organisers' own 5-run baseline (from their [`STATE.md`](https://github.com/yahavb/trainium-agent-labs/blob/master/STATE.md)) is the comparison point.
@@ -113,7 +81,7 @@ Baseline summary (n=1): **solved 1/4** — `results/2026-10-10_krish_baseline_al
 Important for the write-up: after fix A, level 2's rate is **expected to drop**. The old 4/5 counted
 element-at-a-time kernels as solved. A lower honest number is the point, not a regression.
 
-## 6. What we changed in the checker, and why (feeds D1)
+## 4. What we changed in the checker, and why (this is the checker deliverable)
 
 **Fix A — `nkibench.check_issue_bound()` (level 2).** The kernel that "solved" level 2 on round 0 was
 ```python
@@ -143,7 +111,9 @@ intent, and a level-1 kernel that uses `nc_matmul` is told to drop it and given 
 Project 1 measured that printing the answer makes the model copy it instead of deriving it. Verified on
 the simulator: reference level 1 still → 1.0.
 
-## 7. How to work — read before your first change
+**Fix C — `agent.failing_line` + `agent.one_d_cause` (levels 1 and 3).** After fix B, level 1 stopped reaching for matmul and hit the same error as level 3: `SBUF and PSUM tensors must have at least 2 dimensions`. Traced over all 39 attempts that hit it: 36 were `nl.sum(tile, axis=[0, 1])` — reducing over axis 0, the partition axis — and 3 were `shape=x.shape[1:]`, a one-element shape. The old message ("give a vector the shape (1, N)") named neither. Now every simulator error says which kernel line raised it, and for this error the line is diagnosed: a reduction over axis 0 is told never to reduce the partition axis; a sliced shape is told it is a one-element tuple. Verified on the simulator: all four reference kernels still score 1.0.
+
+## 5. How to work — read before your first change
 
 **Get on your own seat** (each person, once — full detail in the [organisers' README, Part 1](https://github.com/yahavb/trainium-agent-labs#part-1--get-onto-your-chip)):
 ```bash
@@ -183,13 +153,12 @@ kubectl cp seat-<N>:/workspace/projects/02-kernel-agent/attempts-L1.jsonl result
 (`run*.log` and `attempts.jsonl` are gitignored on purpose — that is why results are renamed into `results/`.)
 
 **Git.** Small commits, pull before you push (`git pull --rebase`), one person per file at a time — say
-in the task board which file you are editing. Put the task ID in the commit message, e.g. `T5: name the
-2-D tile fix`.
+in the team chat which file you are editing. Say what changed in the commit message.
 
 **Never commit the AWS credentials.** They are shared by the whole event; GitHub scans pushes and AWS
 revokes leaked keys — which would cut off everyone. Paste them into your terminal only.
 
-## 8. Rules of thumb the organisers measured (save yourself the day)
+## 6. Rules of thumb the organisers measured (save yourself the day)
 
 * **Report a rate, not your best run.** `--repeat 5`. Level 2 swings 0.5–1.0 on luck alone.
 * Levels 1, 3, 4 have **zero** spread across runs — a change that moves them was your change.
