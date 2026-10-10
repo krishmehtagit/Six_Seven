@@ -134,6 +134,7 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
     say(f"=== {level}   feedback {feedback}   {rounds} rounds x {samples} attempts   run {run_id}")
     prev_design, prev_feedback, best = None, None, None
     seen = set()
+    totals = dict(attempts=0, prompt_tokens=0, completion_tokens=0, seconds=0.0)
     for rnd in range(rounds):
         prompt = first_prompt(spec) if prev_design is None else repair_prompt(spec, prev_design, prev_feedback)
         if offline:
@@ -143,7 +144,11 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
                 replies = list(ex.map(lambda _: ask(prompt, base_url, model), range(samples)))
 
         graded = []
+        totals["seconds"] += max(r[1]["seconds"] for r in replies)   # attempts in a round run in parallel
         for i, (reply, info) in enumerate(replies):
+            totals["attempts"] += 1
+            totals["prompt_tokens"] += info.get("prompt_tokens") or 0
+            totals["completion_tokens"] += info.get("completion_tokens") or 0
             code = extract_verilog(reply)
             if code:
                 g = checker.grade(ref, code)
@@ -181,7 +186,8 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
     if log:
         log.close()
     return dict(run=run_id, level=level, feedback=feedback, solved=bool(best and best[1]),
-                rounds_used=rnd + 1, best_score=best[0] if best else 0.0, offline=offline)
+                rounds_used=rnd + 1, best_score=best[0] if best else 0.0, offline=offline,
+                distinct_designs=len(seen - {""}), **{k: round(v, 1) for k, v in totals.items()})
 
 
 def main():
