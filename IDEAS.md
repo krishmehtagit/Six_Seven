@@ -22,7 +22,7 @@ Add your idea at the bottom using the same format. Keep it short.
 
 ## Idea 1 — ShapeGuard (by Dhritii07)
 
-*Idea by Dhritii07; rewritten here in short form. Original in the commit "idea 1".*
+*Idea by Dhritii07; rewritten here in short form. Full original: [`idea1.md`](idea1.md).*
 
 **One line:** a tool that finds the input shapes where an AI chip kernel gives wrong answers or slows
 down, and shrinks each failure to the smallest example that still breaks.
