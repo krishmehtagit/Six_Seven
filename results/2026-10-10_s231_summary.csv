@@ -8,3 +8,7 @@ date,tag,seat,model,level,feedback,run,solved,rounds_used,best_score,attempts,di
 2026-10-10,s231,seat-231,Qwen/Qwen3-8B,03_counter,A,1,True,1,1.0,4,3,499,364,17.3,False,s231-03_counter-A-r1-175330
 2026-10-10,s231,seat-231,Qwen/Qwen3-8B,03_counter,B,1,True,1,1.0,4,3,499,364,17.2,False,s231-03_counter-B-r1-175347
 2026-10-10,s231,seat-231,Qwen/Qwen3-8B,03_counter,C,1,True,1,1.0,4,3,499,357,17.0,False,s231-03_counter-C-r1-175404
+2026-10-10,s231,seat-231,Qwen/Qwen3-8B,04_traffic_fsm,A,1,False,6,0.74,24,9,18088,13336,606.3,False,s231-04_traffic_fsm-A-r1-175924
+2026-10-10,s231,seat-231,Qwen/Qwen3-8B,04_traffic_fsm,B,1,False,6,0.683,24,7,14920,10674,485.4,False,s231-04_traffic_fsm-B-r1-180930
+2026-10-10,s231,seat-231,Qwen/Qwen3-8B,04_traffic_fsm,C,1,False,6,0.653,24,7,17220,11531,528.7,False,s231-04_traffic_fsm-C-r1-181736
+2026-10-10,s231,seat-231,Qwen/Qwen3-8B,06_fifo,A,1,False,6,0.324,24,5,13988,7146,324.3,False,s231-06_fifo-A-r1-182631
