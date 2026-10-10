@@ -1,6 +1,6 @@
 # VeriLoop — a small model on Trainium designs chip hardware, a simulator grades it
 
-**Team Six_Seven** · Hack the Chip, NYU × Annapurna Labs, 2026-10-10
+**Team Six Seven** · Hack the Chip, NYU × Annapurna Labs, 2026-10-10
 
 Qwen3-8B, running on an AWS Trainium chip, writes digital hardware in Verilog. A simulator checks every
 design against a reference on every test and sends feedback back; the model tries again. We measured
@@ -47,6 +47,15 @@ Verilog (`brew install icarus-verilog` or `apt-get install iverilog`).
 
 ## Team
 
-Krish Mehta, Dhriti Vaidya, Smruthi, Manish Reddy, Anki, Bhagavan Madala — and **Claude** (Anthropic's AI
-assistant, via Claude Code) as an AI teammate. Built on the organisers' repo,
-[yahavb/trainium-agent-labs](https://github.com/yahavb/trainium-agent-labs).
+| name | email | contribution |
+|---|---|---|
+| **Krish Mehta** | km6152@nyu.edu | built VeriLoop with Claude Code: the checker, agent loop, six levels, experiments on Trainium, analysis and write-up — see the task board (`TASKS.md`) |
+| Dhriti Vaidya | dv2567@nyu.edu | proposed idea 1, "ShapeGuard" (`IDEAS.md`) |
+| Smruthi Ramesh | sr8406@nyu.edu | proposed idea 7, a biomedical signal front-end designer (`IDEAS.md`) |
+| Manish Reddy | mg9444@nyu.edu | — |
+| Bhagavan Madala | bm4245@nyu.edu | — |
+| Ankit Singh | avs8866@nyu.edu | — |
+
+Registered with the organisers as team 7, **Six Seven**.
+
+Built on the organisers' repo, [yahavb/trainium-agent-labs](https://github.com/yahavb/trainium-agent-labs).

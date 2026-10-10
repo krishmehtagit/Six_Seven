@@ -211,9 +211,8 @@ go back to the model → it tries again, until it solves the problem or says hon
 
 - **VeriLoop is approved** by an Annapurna engineer. Now: phase 3, build the checker.
 - Seat 7 is set up and the model is running on it.
-- Team repo: this one. Members: krishmehtagit, Dhritii07, Smruthi01, manishreddy-07, Ankimax, Bhagavanmadala — and **Claude**
-  (Anthropic's AI assistant, via Claude Code), which built the checker, agent, levels, experiment runner and
-  write-up drafts with Krish; its commits are marked `Co-Authored-By: Claude`.
+- Team repo: this one. Members: Krish Mehta, Dhriti Vaidya, Smruthi Ramesh, Manish Reddy, Bhagavan Madala, Ankit Singh
+  (team 7 "Six Seven" on the organisers' sheet). Krish built the project with Claude Code.
 - Earlier work on the organisers' kernel-agent challenge is kept on the branch
   [`kernel-agent-backup`](https://github.com/krishmehtagit/Six_Seven/tree/kernel-agent-backup), in case we need a fallback.
 
