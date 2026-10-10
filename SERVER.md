@@ -126,6 +126,12 @@ Inside your seat the model is at **`http://localhost:8000/v1`** (OpenAI-compatib
 **`Qwen/Qwen3-8B`**. Keep its "thinking" mode **off** and prompts short — the organisers measured that
 thinking made it 55× slower and score zero.
 
+**Two things measured on our seats:**
+- **Never send `seed` in a request.** On this server it crashed the whole model (seat 7). If the model
+  stops answering, restart it: `cd /workspace && ./serve.sh`.
+- At `temperature` 0.7 the model gave the same answer 4 times out of 4; at 1.0 (top_p 0.95) the
+  answers differ. `veriloop/agent.py` already uses 1.0.
+
 ## When something goes wrong
 
 | you see | do this |

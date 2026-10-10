@@ -134,6 +134,16 @@ Times are a guide; fix them once we know the deadlines. Tick items as they are d
 - [ ] Demo rehearsed once (2 minutes: the failure → the feedback → the fix → the graph)
 - [ ] Final check of the requirements list below, then submit
 
+## Findings so far (real runs, seat 7)
+
+- **The full loop works on the chip:** spec → Qwen3-8B → Verilog → simulator → score + feedback.
+- **Easy blocks are solved on the first try:** an 8-bit counter and a 4-bit adder, 4 of 4 attempts correct
+  on round 0 (n=1 run each). So levels 1–3 will not show a feedback difference — **the experiment lives in
+  the harder levels 4–8.** Make their specs precise and their tests thorough.
+- **Sampling:** at temperature 0.7 the model gave 4 identical answers out of 4; at 1.0 they differ, so the
+  agent uses 1.0. On a very easy task it still repeats itself, which is expected.
+- **Never send `seed` to the model server** — it crashed seat 7's server (restarted, back up).
+
 ## Results (fill in from real runs only)
 
 | level | A: pass/fail (solved / 5) | B: verdict (solved / 5) | C: named fix (solved / 5) |
