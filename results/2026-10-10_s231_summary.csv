@@ -12,3 +12,5 @@ date,tag,seat,model,level,feedback,run,solved,rounds_used,best_score,attempts,di
 2026-10-10,s231,seat-231,Qwen/Qwen3-8B,04_traffic_fsm,B,1,False,6,0.683,24,7,14920,10674,485.4,False,s231-04_traffic_fsm-B-r1-180930
 2026-10-10,s231,seat-231,Qwen/Qwen3-8B,04_traffic_fsm,C,1,False,6,0.653,24,7,17220,11531,528.7,False,s231-04_traffic_fsm-C-r1-181736
 2026-10-10,s231,seat-231,Qwen/Qwen3-8B,06_fifo,A,1,False,6,0.324,24,5,13988,7146,324.3,False,s231-06_fifo-A-r1-182631
+2026-10-10,s231,seat-231,Qwen/Qwen3-8B,06_fifo,B,1,False,6,0.356,24,7,15136,8670,395.2,False,s231-06_fifo-B-r1-183156
+2026-10-10,s231,seat-231,Qwen/Qwen3-8B,06_fifo,C,1,False,6,0.328,24,5,16600,7761,350.6,False,s231-06_fifo-C-r1-183832
