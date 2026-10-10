@@ -4,7 +4,8 @@
 
     A1  ask the model for a design and pull the Verilog out of its reply
     A2  the loop: up to R rounds x S attempts; stop when solved; log every attempt as one JSON line
-    A3  (to do) calibration: the agent states solved / could not verify, checked against the checker
+    A3  the agent's claim (SOLVED only if the checker passed it, else COULD NOT VERIFY); the model's own
+        confidence vs the checker is measured separately by calibrate.py
 
 Usage, on a seat with the model running (see SERVER.md):
     python agent.py --level levels/03_counter --feedback C --log ../results/try.jsonl
@@ -185,7 +186,13 @@ def run_level(level_dir, feedback="C", rounds=8, samples=4, log_path=None, offli
 
     if log:
         log.close()
-    return dict(run=run_id, level=level, feedback=feedback, solved=bool(best and best[1]),
+    # The agent's claim comes only from the checker: it cannot report success the checker did not grant.
+    solved = bool(best and best[1])
+    claim = (f"SOLVED -- verified by the checker on every test" if solved else
+             f"COULD NOT VERIFY -- best design passes {best[0]:.2f} of the score; not solved" if best else
+             "COULD NOT VERIFY -- no design came back")
+    say(claim)
+    return dict(run=run_id, level=level, feedback=feedback, solved=solved, claim=claim,
                 rounds_used=rnd + 1, best_score=best[0] if best else 0.0, offline=offline,
                 distinct_designs=len(seen - {""}), **{k: round(v, 1) for k, v in totals.items()})
 
