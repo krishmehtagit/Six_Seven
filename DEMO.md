@@ -40,7 +40,7 @@ wrong. The hard levels are where we hoped C would matter."*
 
 ## 1:30 — what we learned (pick two)
 
-- The model's mistakes are mostly **cycle counting**: 69% of traffic-light failures first hold a light too
+- The model's mistakes are mostly **cycle counting**: 66% of traffic-light failures first hold a light too
   long; the most common design has every phase one cycle too long;
   every MAC failure was the same 9-bit port. (`results/TAXONOMY.md`)
 - The model **goes in circles** without being told it repeated itself — identical design 6 rounds running.
